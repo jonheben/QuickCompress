@@ -1,0 +1,17 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+release
+build
+out
+
+# Config files
+*.config.js
+*.config.ts
+vite.config.ts
+tailwind.config.js
+
+# Logs
+*.log

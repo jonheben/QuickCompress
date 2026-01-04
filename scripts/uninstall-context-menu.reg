@@ -1,0 +1,9 @@
+Windows Registry Editor Version 5.00
+
+; Remove QuickCompress from context menu
+
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\QuickCompress]
+
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\QuickCompress]
+
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.png\shell\QuickCompress]

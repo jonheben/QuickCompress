@@ -1,0 +1,28 @@
+Windows Registry Editor Version 5.00
+
+; Add QuickCompress to context menu for JPG and PNG files
+; This will add "Compress with QuickCompress" option when right-clicking images
+
+; For JPG files
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\QuickCompress]
+@="Compress with QuickCompress"
+"Icon"="C:\\Users\\janhe\\AppData\\Local\\Programs\\QuickCompress\\QuickCompress.exe,0"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\QuickCompress\command]
+@="\"C:\\Users\\janhe\\AppData\\Local\\Programs\\QuickCompress\\QuickCompress.exe\" --compress \"%1\" --quality 75"
+
+; For JPEG files
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\QuickCompress]
+@="Compress with QuickCompress"
+"Icon"="C:\\Users\\janhe\\AppData\\Local\\Programs\\QuickCompress\\QuickCompress.exe,0"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\QuickCompress\command]
+@="\"C:\\Users\\janhe\\AppData\\Local\\Programs\\QuickCompress\\QuickCompress.exe\" --compress \"%1\" --quality 75"
+
+; For PNG files
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.png\shell\QuickCompress]
+@="Compress with QuickCompress"
+"Icon"="C:\\Users\\janhe\\AppData\\Local\\Programs\\QuickCompress\\QuickCompress.exe,0"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.png\shell\QuickCompress\command]
+@="\"C:\\Users\\janhe\\AppData\\Local\\Programs\\QuickCompress\\QuickCompress.exe\" --compress \"%1\" --quality 75"
