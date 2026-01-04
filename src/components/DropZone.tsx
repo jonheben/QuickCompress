@@ -12,11 +12,7 @@ export function DropZone() {
     if (!files) return;
 
     const validFiles = Array.from(files).filter((file) => {
-      const isValid = file.type === 'image/jpeg' || file.type === 'image/png';
-      if (!isValid) {
-        console.warn(`Skipping invalid file: ${file.name}`);
-      }
-      return isValid;
+      return file.type === 'image/jpeg' || file.type === 'image/png';
     });
 
     if (validFiles.length === 0) {
@@ -32,11 +28,12 @@ export function DropZone() {
           return {
             id: `${Date.now()}-${Math.random()}`,
             name: file.name,
-            path: (file as any).path || '', // Electron provides file.path
+            path: (file as File & { path?: string }).path || '', // Electron provides file.path
             size: file.size,
             preview,
           };
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error(`Error creating thumbnail for ${file.name}:`, error);
           return null;
         }
@@ -97,20 +94,11 @@ export function DropZone() {
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 4v16m8-8H4"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
         </svg>
         <div>
-          <p className="text-lg font-medium text-gray-700">
-            Drop images here or click to browse
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            Supports JPG and PNG files
-          </p>
+          <p className="text-lg font-medium text-gray-700">Drop images here or click to browse</p>
+          <p className="text-sm text-gray-500 mt-1">Supports JPG and PNG files</p>
         </div>
       </div>
       <input
