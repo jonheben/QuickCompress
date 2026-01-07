@@ -76,9 +76,6 @@ async function compressQualityMode(
     if (removeMetadata) {
       pipeline = pipeline.withMetadata({
         exif: {},
-        icc: undefined,
-        iptc: undefined,
-        xmp: undefined,
       });
     }
 
@@ -94,9 +91,6 @@ async function compressQualityMode(
     if (removeMetadata) {
       pipeline = pipeline.withMetadata({
         exif: {},
-        icc: undefined,
-        iptc: undefined,
-        xmp: undefined,
       });
     }
 
@@ -142,9 +136,6 @@ async function compressTargetPercentMode(
     if (removeMetadata) {
       pipeline = pipeline.withMetadata({
         exif: {},
-        icc: undefined,
-        iptc: undefined,
-        xmp: undefined,
       });
     }
 
@@ -215,9 +206,6 @@ async function compressTargetAbsoluteMode(
     if (removeMetadata) {
       pipeline = pipeline.withMetadata({
         exif: {},
-        icc: undefined,
-        iptc: undefined,
-        xmp: undefined,
       });
     }
 
