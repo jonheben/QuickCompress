@@ -2,9 +2,16 @@ import { DropZone } from './components/DropZone';
 import { ImageList } from './components/ImageList';
 import { CompressionSlider } from './components/CompressionSlider';
 import { ExportButton } from './components/ExportButton';
-import { ProgressIndicator } from './components/ProgressIndicator';
+import { CompressionModal } from './components/CompressionModal';
 import { ResultsDisplay } from './components/ResultsDisplay';
+import { ErrorNotification } from './components/ErrorNotification';
 import PresetSelector from './components/PresetSelector';
+import { OutputDirectorySelector } from './components/OutputDirectorySelector';
+import { CompressionFormatToggle } from './components/CompressionFormatToggle';
+import { CompressionModeSelector } from './components/CompressionModeSelector';
+import { TargetSizeInput } from './components/TargetSizeInput';
+import { PngCompressionLevelSelector } from './components/PngCompressionLevelSelector';
+import { FormatWarning } from './components/FormatWarning';
 import { useImageStore } from './store/useImageStore';
 import { useState, useEffect } from 'react';
 
@@ -19,6 +26,8 @@ function App() {
     completed: number;
     total: number;
     fileName: string;
+    iteration?: number;
+    maxIterations?: number;
   } | null>(null);
 
   useEffect(() => {
@@ -28,6 +37,8 @@ function App() {
         completed: data.completed,
         total: data.total,
         fileName: data.fileName,
+        iteration: data.iteration,
+        maxIterations: data.maxIterations,
       });
     });
 
@@ -43,16 +54,21 @@ function App() {
   }, [isProcessing]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-tech-bg flex flex-col">
+      <ErrorNotification />
+
+      {/* Compression Modal - Full screen overlay */}
+      {isProcessing && <CompressionModal progress={compressionProgress} />}
+
       {/* Custom Title Bar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between drag-region">
+      <div className="bg-tech-bg border-b border-tech-border px-4 py-2 flex items-center justify-between drag-region">
         <div className="flex items-center gap-2">
-          <h1 className="text-sm font-semibold text-gray-800">QuickCompress</h1>
+          <h1 className="text-sm font-semibold text-tech-white">QuickCompress</h1>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => window.close()}
-            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 hover:text-gray-900 no-drag"
+            className="w-8 h-8 flex items-center justify-center hover:bg-tech-surface rounded text-tech-grey hover:text-tech-white no-drag transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -66,29 +82,25 @@ function App() {
         </div>
       </div>
 
-      <div className="flex-1 max-w-4xl w-full mx-auto px-6 py-8">
-        {/* Header */}
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">QuickCompress</h1>
-          <p className="text-gray-600">Compress your images without losing quality</p>
-        </header>
-
+      <div className="flex-1 max-w-4xl w-full mx-auto px-6 py-6">
         {/* Main Content */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-tech-surface rounded border border-tech-border p-6">
           {results.length === 0 ? (
             <>
               <DropZone />
-              <ImageList />
 
               {images.length > 0 && (
                 <>
+                  <CompressionFormatToggle />
+                  <FormatWarning />
+                  <CompressionModeSelector />
                   <PresetSelector selectedPreset={selectedPreset} onPresetChange={setPreset} />
                   <CompressionSlider />
-                  {isProcessing ? (
-                    <ProgressIndicator progress={compressionProgress} />
-                  ) : (
-                    <ExportButton />
-                  )}
+                  <TargetSizeInput />
+                  <PngCompressionLevelSelector />
+                  <OutputDirectorySelector />
+                  <ExportButton />
+                  <ImageList />
                 </>
               )}
             </>

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Notification } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import { setupIpcHandlers } from './ipc/handlers';
 import { compressImage } from './services/compressionService';
@@ -20,101 +20,89 @@ function parseCliArgs() {
     if (args[i] === '--compress' && args[i + 1]) {
       cliMode.enabled = true;
       cliMode.filePath = args[i + 1];
-      i++;
-    } else if (args[i] === '--quality' && args[i + 1]) {
-      cliMode.quality = parseInt(args[i + 1], 10);
-      i++;
+      if (args[i + 2] && !isNaN(parseInt(args[i + 2]))) {
+        cliMode.quality = parseInt(args[i + 2]);
+      }
     }
   }
 
   return cliMode;
 }
 
-// CLI compression mode
+// Run compression in CLI mode without GUI
 async function runCliMode(filePath: string, quality: number) {
+
   try {
-    const result = await compressImage(filePath, quality);
+    logger.info('Running in CLI mode', { filePath, quality });
+
+    const result = await compressImage(filePath, { mode: 'quality', format: 'lossy', quality });
 
     if (result.success) {
-      // Show success notification
-      new Notification({
-        title: 'QuickCompress',
-        body: `Image compressed successfully!\nSaved ${result.compressionRatio.toFixed(1)}% space`,
-        icon: path.join(__dirname, '../../resources/icon.png'),
-      }).show();
-
-      logger.info('CLI compression successful', {
-        originalSize: result.originalSize,
-        compressedSize: result.compressedSize,
-        compressionRatio: result.compressionRatio,
+      logger.info('Compression successful', {
         outputPath: result.outputPath,
+        compressionRatio: result.compressionRatio,
       });
-
-      // eslint-disable-next-line no-console
-      console.log('✓ Compression successful!');
-      // eslint-disable-next-line no-console
-      console.log(`  Original: ${(result.originalSize / 1024).toFixed(1)} KB`);
-      // eslint-disable-next-line no-console
-      console.log(`  Compressed: ${(result.compressedSize / 1024).toFixed(1)} KB`);
-      // eslint-disable-next-line no-console
+      console.log(`✓ Compressed: ${result.outputPath}`);
+      console.log(`  Original: ${(result.originalSize / 1024).toFixed(2)} KB`);
+      console.log(`  Compressed: ${(result.compressedSize / 1024).toFixed(2)} KB`);
       console.log(`  Saved: ${result.compressionRatio.toFixed(1)}%`);
-      // eslint-disable-next-line no-console
-      console.log(`  Output: ${result.outputPath}`);
-
-      app.quit();
+      app.exit(0);
     } else {
-      logger.error('CLI compression failed', { error: result.error });
-      // eslint-disable-next-line no-console
-      console.error('✗ Compression failed:', result.error);
+      logger.error('Compression failed', { error: result.error });
+      console.error(`✗ Error: ${result.error}`);
       app.exit(1);
     }
   } catch (error) {
-    logger.error('CLI compression error', { error });
-    // eslint-disable-next-line no-console
-    console.error('✗ Error:', error);
+    logger.error('Unexpected error in CLI mode', { error });
+    console.error(`✗ Unexpected error: ${error}`);
     app.exit(1);
   }
 }
 
+// Create the main application window
 function createWindow() {
+
   mainWindow = new BrowserWindow({
-    width: 900,
+    width: 1000,
     height: 700,
-    minWidth: 700,
+    minWidth: 800,
     minHeight: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
-    backgroundColor: '#FAFAFA',
-    show: false,
-    frame: false,
     titleBarStyle: 'hidden',
-  });
-
-  // Show window when ready to avoid flickering
-  mainWindow.once('ready-to-show', () => {
-    mainWindow?.show();
+    titleBarOverlay: {
+      color: '#0D0D0D',
+      symbolColor: '#FFFFFF',
+      height: 40,
+    },
+    backgroundColor: '#0D0D0D',
+    show: false,
   });
 
   // Load the app
-  if (process.env.NODE_ENV === 'development' || !app.isPackaged) {
-    // Development mode: load from Vite dev server
-    mainWindow.loadURL('http://localhost:5173');
-    mainWindow.webContents.openDevTools();
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow!.loadURL('http://localhost:5173');
+    mainWindow!.webContents.openDevTools();
   } else {
-    // Production mode: load from built files
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    mainWindow!.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
 
-  mainWindow.on('closed', () => {
+  // Show window when ready
+  mainWindow!.once('ready-to-show', () => {
+    mainWindow?.show();
+  });
+
+  mainWindow!.on('closed', () => {
     mainWindow = null;
   });
 }
 
 // App lifecycle
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+
   setupIpcHandlers();
 
   // Check if running in CLI mode
@@ -122,23 +110,21 @@ app.whenReady().then(() => {
 
   if (cliMode.enabled && cliMode.filePath) {
     // Run in CLI mode without opening window
-    runCliMode(cliMode.filePath, cliMode.quality);
+    await runCliMode(cliMode.filePath, cliMode.quality);
   } else {
     // Normal GUI mode
     createWindow();
   }
 
   app.on('activate', () => {
-    // On macOS, re-create window when dock icon is clicked
-    if (BrowserWindow.getAllWindows().length === 0) {
+    if (mainWindow === null) {
       createWindow();
     }
   });
-});
 
-app.on('window-all-closed', () => {
-  // On Windows/Linux, quit when all windows are closed
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+      app.quit();
+    }
+  });
 });

@@ -5,7 +5,7 @@ import { logger } from '../utils/logger';
 
 interface CompressionJob {
   inputPath: string;
-  quality: number;
+  options: any;
   outputDirectory?: string;
 }
 
@@ -34,10 +34,21 @@ class WorkerPool {
     // In production, it's in the dist/electron folder
     this.workerPath = path.join(__dirname, 'workers', 'compressionWorker.js');
 
-    logger.info('Worker pool initialized', {
-      poolSize: this.poolSize,
-      cpuCount: os.cpus().length,
-    });
+    // Verify worker file exists
+    const fs = require('fs');
+    if (!fs.existsSync(this.workerPath)) {
+      console.error('[WorkerPool] Worker file not found at:', this.workerPath);
+      console.error('[WorkerPool] __dirname is:', __dirname);
+      console.error('[WorkerPool] Attempting alternative path...');
+      // Try alternative path for development
+      const altPath = path.join(__dirname, '..', '..', 'electron', 'workers', 'compressionWorker.js');
+      if (fs.existsSync(altPath)) {
+        this.workerPath = altPath;
+        console.log('[WorkerPool] Using alternative path:', this.workerPath);
+      }
+    } else {
+      console.log('[WorkerPool] Worker initialized at:', this.workerPath);
+    }
   }
 
   /**
@@ -48,7 +59,7 @@ class WorkerPool {
    */
   async compressInParallel(
     jobs: CompressionJob[],
-    onProgress?: (completed: number, total: number, result: CompressionResult) => void
+    onProgress?: (completed: number, total: number, result: CompressionResult, iteration?: number) => void
   ): Promise<CompressionResult[]> {
     const results: CompressionResult[] = [];
     const total = jobs.length;
@@ -63,7 +74,24 @@ class WorkerPool {
     const chunkSize = this.poolSize;
     for (let i = 0; i < jobs.length; i += chunkSize) {
       const chunk = jobs.slice(i, i + chunkSize);
-      const chunkResults = await Promise.all(chunk.map((job) => this.runWorker(job)));
+      const chunkResults = await Promise.all(
+        chunk.map((job, index) =>
+          this.runWorker(job, (iteration) => {
+            // Send iteration updates for in-progress jobs
+            if (onProgress) {
+              const tempResult: CompressionResult = {
+                originalName: path.basename(job.inputPath),
+                originalSize: 0,
+                compressedSize: 0,
+                compressionRatio: 0,
+                outputPath: '',
+                success: true,
+              };
+              onProgress(completed + index, total, tempResult, iteration);
+            }
+          })
+        )
+      );
 
       for (const result of chunkResults) {
         results.push(result);
@@ -94,36 +122,98 @@ class WorkerPool {
   /**
    * Run a single worker for a compression job
    * @param job Compression job data
+   * @param onIteration Optional callback for iteration updates
    * @returns Promise resolving to compression result
    */
-  private runWorker(job: CompressionJob): Promise<CompressionResult> {
+  private runWorker(
+    job: CompressionJob,
+    onIteration?: (iteration: number) => void
+  ): Promise<CompressionResult> {
     return new Promise((resolve) => {
+      const WORKER_TIMEOUT = 60000; // 60 seconds timeout per image
+      let timeoutId: NodeJS.Timeout;
+      let isResolved = false;
+
       const worker = new Worker(this.workerPath, {
         workerData: job,
       });
 
-      worker.on('message', (result: CompressionResult) => {
-        worker.terminate();
-        resolve(result);
+      // Set timeout to prevent hung workers
+      timeoutId = setTimeout(() => {
+        if (!isResolved) {
+          isResolved = true;
+          logger.error('Worker timeout', { job, timeout: WORKER_TIMEOUT });
+          worker.terminate();
+          resolve({
+            success: false,
+            originalName: path.basename(job.inputPath),
+            originalSize: 0,
+            compressedSize: 0,
+            compressionRatio: 0,
+            outputPath: '',
+            error: 'Compression timeout - file may be too large or corrupted',
+          });
+        }
+      }, WORKER_TIMEOUT);
+
+      worker.on('message', (message: any) => {
+        // Handle different message types
+        if (message.type === 'iteration') {
+          // Iteration progress update
+          if (onIteration) {
+            onIteration(message.iteration);
+          }
+        } else if (message.type === 'result') {
+          // Final result
+          if (!isResolved) {
+            isResolved = true;
+            clearTimeout(timeoutId);
+            worker.terminate();
+            resolve(message.result);
+          }
+        } else {
+          // Legacy format (direct result object)
+          if (!isResolved) {
+            isResolved = true;
+            clearTimeout(timeoutId);
+            worker.terminate();
+            resolve(message);
+          }
+        }
       });
 
       worker.on('error', (error) => {
-        logger.error('Worker error', { error: error.message, job });
-        worker.terminate();
-        resolve({
-          success: false,
-          originalName: path.basename(job.inputPath),
-          originalSize: 0,
-          compressedSize: 0,
-          compressionRatio: 0,
-          outputPath: '',
-          error: error.message,
-        });
+        if (!isResolved) {
+          isResolved = true;
+          clearTimeout(timeoutId);
+          logger.error('Worker error', { error: error.message, job });
+          worker.terminate();
+          resolve({
+            success: false,
+            originalName: path.basename(job.inputPath),
+            originalSize: 0,
+            compressedSize: 0,
+            compressionRatio: 0,
+            outputPath: '',
+            error: error.message,
+          });
+        }
       });
 
       worker.on('exit', (code) => {
-        if (code !== 0) {
+        if (code !== 0 && !isResolved) {
+          isResolved = true;
+          clearTimeout(timeoutId);
           logger.warn('Worker exited with non-zero code', { code, job });
+          resolve({
+            success: false,
+            originalName: path.basename(job.inputPath),
+            originalSize: 0,
+            compressedSize: 0,
+            compressionRatio: 0,
+            outputPath: '',
+            error: `Worker crashed with exit code ${code}`,
+          });
         }
       });
     });

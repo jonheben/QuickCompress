@@ -7,13 +7,17 @@ interface ProgressData {
   total: number;
   fileName: string;
   success: boolean;
+  iteration?: number;
+  maxIterations?: number;
 }
 
 contextBridge.exposeInMainWorld('electron', {
-  compressImages: (imagePaths: string[], quality: number) =>
-    ipcRenderer.invoke('compress-images', imagePaths, quality),
+  compressImages: (imagePaths: string[], options: any, outputDirectory?: string) =>
+    ipcRenderer.invoke('compress-images', imagePaths, options, outputDirectory),
   openFolder: (filePath: string) => ipcRenderer.invoke('open-folder', filePath),
   selectOutputDirectory: () => ipcRenderer.invoke('select-output-directory'),
+  loadImage: (imagePath: string) => ipcRenderer.invoke('load-image', imagePath),
+  scanFolder: (folderPath: string) => ipcRenderer.invoke('scan-folder', folderPath),
   onCompressionProgress: (callback: (data: ProgressData) => void) => {
     const listener = (_event: Electron.IpcRendererEvent, data: ProgressData) => callback(data);
     ipcRenderer.on('compression-progress', listener);
@@ -49,10 +53,28 @@ export interface DirectoryResponse {
   error?: string;
 }
 
+export interface LoadImageResponse {
+  success: boolean;
+  dataUrl?: string;
+  error?: string;
+}
+
+export interface ScanFolderResponse {
+  success: boolean;
+  imagePaths?: string[];
+  error?: string;
+}
+
 export interface ElectronAPI {
-  compressImages: (imagePaths: string[], quality: number) => Promise<CompressionResponse>;
+  compressImages: (
+    imagePaths: string[],
+    options: any,
+    outputDirectory?: string
+  ) => Promise<CompressionResponse>;
   openFolder: (filePath: string) => Promise<FolderResponse>;
   selectOutputDirectory: () => Promise<DirectoryResponse>;
+  loadImage: (imagePath: string) => Promise<LoadImageResponse>;
+  scanFolder: (folderPath: string) => Promise<ScanFolderResponse>;
   onCompressionProgress: (callback: (data: ProgressData) => void) => () => void;
 }
 

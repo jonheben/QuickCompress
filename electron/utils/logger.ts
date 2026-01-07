@@ -1,18 +1,21 @@
 import log from 'electron-log';
 import path from 'path';
-import { app } from 'electron';
 
 // Configure electron-log
 log.transports.file.maxSize = 10 * 1024 * 1024; // 10 MB
 log.transports.file.level = 'info';
 log.transports.console.level = 'debug';
 
-// Set log file location
-if (app) {
-  log.transports.file.resolvePathFn = () => {
+// Set log file location (lazy-loaded when needed)
+log.transports.file.resolvePathFn = () => {
+  try {
+    const { app } = require('electron');
     return path.join(app.getPath('userData'), 'logs', 'quickcompress.log');
-  };
-}
+  } catch {
+    // Fallback for when electron app is not ready
+    return path.join(process.cwd(), 'logs', 'quickcompress.log');
+  }
+};
 
 // Format log output
 log.transports.file.format = '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}] {text}';

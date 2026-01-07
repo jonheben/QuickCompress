@@ -1,24 +1,19 @@
-interface CompressionResult {
-  originalName: string;
-  originalSize: number;
-  compressedSize: number;
-  compressionRatio: number;
-  outputPath: string;
-  success: boolean;
-  error?: string;
-}
+import { CompressionOptions, CompressionResult } from './types';
 
 interface ProgressData {
   completed: number;
   total: number;
   fileName: string;
   success: boolean;
+  iteration?: number;       // NEW: Current iteration for iterative modes
+  maxIterations?: number;   // NEW: Max iterations for iterative modes
 }
 
 export interface ElectronAPI {
   compressImages: (
     imagePaths: string[],
-    quality: number
+    options: CompressionOptions,  // Changed from quality: number
+    outputDirectory?: string
   ) => Promise<{
     success: boolean;
     results?: CompressionResult[];
@@ -32,6 +27,16 @@ export interface ElectronAPI {
     success: boolean;
     path?: string;
     canceled?: boolean;
+    error?: string;
+  }>;
+  loadImage: (imagePath: string) => Promise<{
+    success: boolean;
+    dataUrl?: string;
+    error?: string;
+  }>;
+  scanFolder: (folderPath: string) => Promise<{
+    success: boolean;
+    imagePaths?: string[];
     error?: string;
   }>;
   onCompressionProgress: (callback: (data: ProgressData) => void) => () => void;

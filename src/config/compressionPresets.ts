@@ -1,32 +1,37 @@
-export type PresetKey = 'webOptimized' | 'highQuality' | 'smallFile' | 'custom';
+export type PresetKey = 'highQuality' | 'balanced' | 'maxCompression' | 'custom';
 
 export interface CompressionPreset {
   quality: number;
+  targetPercent: number;  // Default target % for this preset
   label: string;
   description: string;
 }
 
 export const COMPRESSION_PRESETS: Record<PresetKey, CompressionPreset> = {
-  webOptimized: {
-    quality: 70,
-    label: 'Web Optimized',
-    description: 'Balanced quality and file size, perfect for websites',
-  },
   highQuality: {
     quality: 85,
-    label: 'High Quality',
-    description: 'Minimal quality loss, ideal for professional use',
+    targetPercent: 80,
+    label: 'Minimal Loss',
+    description: 'Preserve quality, ideal for archival and professional use',
   },
-  smallFile: {
+  balanced: {
+    quality: 70,
+    targetPercent: 50,
+    label: 'Balanced',
+    description: 'Great balance between quality and file size',
+  },
+  maxCompression: {
     quality: 55,
-    label: 'Small File',
-    description: 'Maximum compression, great for social media',
+    targetPercent: 25,
+    label: 'Web Ready',
+    description: 'Maximum compression for web and social media',
   },
   custom: {
     quality: 75,
+    targetPercent: 50,
     label: 'Custom',
-    description: 'Manually adjust quality with the slider',
+    description: 'Manually adjust compression parameters',
   },
 };
 
-export const DEFAULT_PRESET: PresetKey = 'webOptimized';
+export const DEFAULT_PRESET: PresetKey = 'balanced';

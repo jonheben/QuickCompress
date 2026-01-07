@@ -10,10 +10,10 @@ export function ImageItem({ image }: ImageItemProps) {
   const removeImage = useImageStore((state) => state.removeImage);
 
   return (
-    <div className="relative bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow">
+    <div className="relative bg-tech-surface rounded border border-tech-border p-3 hover:border-tech-orange transition-colors">
       <button
         onClick={() => removeImage(image.id)}
-        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+        className="absolute top-1 right-1 bg-tech-orange text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-[#E64500] transition-colors"
         title="Remove image"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,10 +27,10 @@ export function ImageItem({ image }: ImageItemProps) {
         className="w-full h-24 object-cover rounded mb-2"
       />
 
-      <p className="text-sm font-medium text-gray-700 truncate" title={image.name}>
+      <p className="text-sm font-sans text-tech-white truncate" title={image.name}>
         {image.name}
       </p>
-      <p className="text-xs text-gray-500 mt-1">
+      <p className="text-xs font-mono text-tech-grey mt-1">
         {formatFileSize(image.size)}
       </p>
     </div>
