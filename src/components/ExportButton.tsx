@@ -13,6 +13,7 @@ export function ExportButton() {
     if (images.length === 0 || isProcessing) return;
 
     console.log('[ExportButton] Starting compression, setting isProcessing=true');
+    const startTime = Date.now();
     setProcessing(true);
     setError(null);
 
@@ -32,6 +33,13 @@ export function ExportButton() {
         options,
         outputDirectory || undefined
       );
+
+      // Ensure modal shows for at least 800ms
+      const elapsed = Date.now() - startTime;
+      const minDisplayTime = 800;
+      if (elapsed < minDisplayTime) {
+        await new Promise(resolve => setTimeout(resolve, minDisplayTime - elapsed));
+      }
 
       if (response.success && response.results) {
         console.log('[ExportButton] Compression successful, setting results');

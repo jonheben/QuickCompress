@@ -85,11 +85,11 @@ export const useImageStore = create<ImageStore>((set, get) => ({
 
   setProcessing: (isProcessing) => set({ isProcessing }),
 
-  setResults: (results) => set({ results, isProcessing: false, error: null }),
+  setResults: (results) => set({ results, error: null }),
 
   setOutputDirectory: (directory) => set({ outputDirectory: directory }),
 
-  setError: (error) => set({ error, isProcessing: false }),
+  setError: (error) => set({ error }),
 
   // NEW compression mode actions
   setCompressionMode: (mode) =>
