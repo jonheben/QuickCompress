@@ -16,13 +16,16 @@ export interface CompressionOptions {
   format: CompressionFormat;
 
   // Mode-specific parameters
-  quality?: number;              // For quality mode (0-100)
-  targetPercent?: number;        // For targetPercent mode (1-100)
-  targetSize?: number;           // For targetAbsolute mode (KB)
-  targetSizeUnit?: 'KB' | 'MB';  // Unit for targetAbsolute
+  quality?: number; // For quality mode (0-100)
+  targetPercent?: number; // For targetPercent mode (1-100)
+  targetSize?: number; // For targetAbsolute mode (KB)
+  targetSizeUnit?: 'KB' | 'MB'; // Unit for targetAbsolute
 
   // PNG-specific options
-  pngCompressionLevel?: number;  // 0-9 for lossless PNG
+  pngCompressionLevel?: number; // 0-9 for lossless PNG
+
+  // Additional options
+  removeMetadata?: boolean; // Strip EXIF/GPS/metadata
 }
 
 export interface CompressionResult {
@@ -33,6 +36,6 @@ export interface CompressionResult {
   outputPath: string;
   success: boolean;
   error?: string;
-  iterations?: number;           // For iterative modes
-  targetAchieved?: boolean;      // Whether target size was reached
+  iterations?: number; // For iterative modes
+  targetAchieved?: boolean; // Whether target size was reached
 }

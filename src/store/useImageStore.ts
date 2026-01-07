@@ -1,5 +1,11 @@
 import { create } from 'zustand';
-import { ImageFile, CompressionResult, CompressionMode, CompressionFormat, CompressionOptions } from '../types';
+import {
+  ImageFile,
+  CompressionResult,
+  CompressionMode,
+  CompressionFormat,
+  CompressionOptions,
+} from '../types';
 import { PresetKey, DEFAULT_PRESET, COMPRESSION_PRESETS } from '../config/compressionPresets';
 
 interface ImageStore {
@@ -17,15 +23,19 @@ interface ImageStore {
   selectedPreset: PresetKey;
 
   // Mode-specific parameters
-  quality: number;               // For quality mode
-  targetPercent: number;         // For targetPercent mode
-  targetSize: number;            // For targetAbsolute mode (in KB)
+  quality: number; // For quality mode
+  targetPercent: number; // For targetPercent mode
+  targetSize: number; // For targetAbsolute mode (in KB)
   targetSizeUnit: 'KB' | 'MB';
-  pngCompressionLevel: number;   // For lossless PNG (0-9)
+  pngCompressionLevel: number; // For lossless PNG (0-9)
+
+  // Additional options
+  removeMetadata: boolean; // Strip EXIF/metadata
 
   // Existing actions
   addImages: (images: ImageFile[]) => void;
   removeImage: (id: string) => void;
+  updateImagePreview: (id: string, preview: string) => void;
   setProcessing: (isProcessing: boolean) => void;
   setResults: (results: CompressionResult[]) => void;
   setOutputDirectory: (directory: string | null) => void;
@@ -41,6 +51,7 @@ interface ImageStore {
   setTargetSize: (size: number) => void;
   setTargetSizeUnit: (unit: 'KB' | 'MB') => void;
   setPngCompressionLevel: (level: number) => void;
+  setRemoveMetadata: (remove: boolean) => void;
 
   // Helper to build CompressionOptions
   getCompressionOptions: () => CompressionOptions;
@@ -64,6 +75,7 @@ export const useImageStore = create<ImageStore>((set, get) => ({
   targetSize: 500,
   targetSizeUnit: 'KB',
   pngCompressionLevel: 6,
+  removeMetadata: true,
 
   addImages: (newImages) =>
     set((state) => {
@@ -83,6 +95,11 @@ export const useImageStore = create<ImageStore>((set, get) => ({
       images: state.images.filter((img) => img.id !== id),
     })),
 
+  updateImagePreview: (id, preview) =>
+    set((state) => ({
+      images: state.images.map((img) => (img.id === id ? { ...img, preview } : img)),
+    })),
+
   setProcessing: (isProcessing) => set({ isProcessing }),
 
   setResults: (results) => set({ results, error: null }),
@@ -92,11 +109,9 @@ export const useImageStore = create<ImageStore>((set, get) => ({
   setError: (error) => set({ error }),
 
   // NEW compression mode actions
-  setCompressionMode: (mode) =>
-    set({ compressionMode: mode }),
+  setCompressionMode: (mode) => set({ compressionMode: mode }),
 
-  setCompressionFormat: (format) =>
-    set({ compressionFormat: format }),
+  setCompressionFormat: (format) => set({ compressionFormat: format }),
 
   setPreset: (preset) =>
     set((state) => {
@@ -119,20 +134,17 @@ export const useImageStore = create<ImageStore>((set, get) => ({
       return updates;
     }),
 
-  setQuality: (quality) =>
-    set({ quality, selectedPreset: 'custom' }),
+  setQuality: (quality) => set({ quality, selectedPreset: 'custom' }),
 
-  setTargetPercent: (percent) =>
-    set({ targetPercent: percent, selectedPreset: 'custom' }),
+  setTargetPercent: (percent) => set({ targetPercent: percent, selectedPreset: 'custom' }),
 
-  setTargetSize: (size) =>
-    set({ targetSize: size, selectedPreset: 'custom' }),
+  setTargetSize: (size) => set({ targetSize: size, selectedPreset: 'custom' }),
 
-  setTargetSizeUnit: (unit) =>
-    set({ targetSizeUnit: unit }),
+  setTargetSizeUnit: (unit) => set({ targetSizeUnit: unit }),
 
-  setPngCompressionLevel: (level) =>
-    set({ pngCompressionLevel: level }),
+  setPngCompressionLevel: (level) => set({ pngCompressionLevel: level }),
+
+  setRemoveMetadata: (remove) => set({ removeMetadata: remove }),
 
   getCompressionOptions: () => {
     const state = get();
@@ -144,6 +156,7 @@ export const useImageStore = create<ImageStore>((set, get) => ({
       targetSize: state.targetSize,
       targetSizeUnit: state.targetSizeUnit,
       pngCompressionLevel: state.pngCompressionLevel,
+      removeMetadata: state.removeMetadata,
     };
   },
 
@@ -163,5 +176,6 @@ export const useImageStore = create<ImageStore>((set, get) => ({
       targetSize: 500,
       targetSizeUnit: 'KB',
       pngCompressionLevel: 6,
+      removeMetadata: true,
     }),
 }));

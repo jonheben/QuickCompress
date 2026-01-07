@@ -12,6 +12,7 @@ import { CompressionModeSelector } from './components/CompressionModeSelector';
 import { TargetSizeInput } from './components/TargetSizeInput';
 import { PngCompressionLevelSelector } from './components/PngCompressionLevelSelector';
 import { FormatWarning } from './components/FormatWarning';
+import { MetadataRemovalToggle } from './components/MetadataRemovalToggle';
 import { useImageStore } from './store/useImageStore';
 import { useState, useEffect } from 'react';
 
@@ -98,6 +99,7 @@ function App() {
                   <CompressionSlider />
                   <TargetSizeInput />
                   <PngCompressionLevelSelector />
+                  <MetadataRemovalToggle />
                   <OutputDirectorySelector />
                   <ExportButton />
                   <ImageList />

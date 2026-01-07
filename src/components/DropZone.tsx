@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useImageStore } from '../store/useImageStore';
 import { createThumbnail } from '../utils/formatters';
 import { ImageFile } from '../types';
@@ -7,6 +7,35 @@ export function DropZone() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addImages = useImageStore((state) => state.addImages);
+  const updateImagePreview = useImageStore((state) => state.updateImagePreview);
+
+  // Handle clipboard paste (Ctrl+V)
+  useEffect(() => {
+    const handlePaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const imageItems: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+            imageItems.push(file);
+          }
+        }
+      }
+
+      if (imageItems.length > 0) {
+        const fileList = new DataTransfer();
+        imageItems.forEach((file) => fileList.items.add(file));
+        handleFiles(fileList.files);
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, []);
 
   const handleFiles = async (files: FileList | null) => {
     if (!files) return;
@@ -20,28 +49,26 @@ export function DropZone() {
       return;
     }
 
-    // Process files and create thumbnails
-    const imageFiles: ImageFile[] = await Promise.all(
-      validFiles.map(async (file) => {
-        try {
-          const preview = await createThumbnail(file);
-          return {
-            id: `${Date.now()}-${Math.random()}`,
-            name: file.name,
-            path: (file as File & { path?: string }).path || '', // Electron provides file.path
-            size: file.size,
-            preview,
-          };
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(`Error creating thumbnail for ${file.name}:`, error);
-          return null;
-        }
-      })
-    );
+    // Add files immediately with placeholder preview for instant feedback
+    const imageFiles: ImageFile[] = validFiles.map((file) => ({
+      id: `${Date.now()}-${Math.random()}`,
+      name: file.name,
+      path: (file as File & { path?: string }).path || '', // Electron provides file.path
+      size: file.size,
+      preview: '', // Empty preview initially - will load in background
+    }));
 
-    const validImageFiles = imageFiles.filter((img): img is ImageFile => img !== null);
-    addImages(validImageFiles);
+    addImages(imageFiles);
+
+    // Generate thumbnails in background (non-blocking)
+    imageFiles.forEach(async (imageFile, index) => {
+      try {
+        const preview = await createThumbnail(validFiles[index]);
+        updateImagePreview(imageFile.id, preview);
+      } catch (error) {
+        console.error(`Error creating thumbnail for ${imageFile.name}:`, error);
+      }
+    });
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -108,48 +135,40 @@ export function DropZone() {
         return;
       }
 
-      // Create ImageFile objects for all found images
-      const imageFiles: ImageFile[] = await Promise.all(
-        response.imagePaths.map(async (path) => {
-          try {
-            // Load image as blob to create thumbnail
-            const imageResponse = await window.electron.loadImage(path);
-            if (!imageResponse.success || !imageResponse.dataUrl) {
-              return null;
-            }
+      // Create ImageFile objects immediately with placeholder previews
+      const imageFiles: ImageFile[] = response.imagePaths.map((path) => ({
+        id: `${Date.now()}-${Math.random()}`,
+        name: path.split(/[\\/]/).pop() || 'image.jpg',
+        path,
+        size: 0, // Will be updated when preview loads
+        preview: '', // Empty preview initially
+      }));
 
-            // Convert data URL to blob for thumbnail creation
-            const blob = await fetch(imageResponse.dataUrl).then((r) => r.blob());
-            const file = new File([blob], path.split(/[\\/]/).pop() || 'image.jpg', {
-              type: blob.type,
-            });
+      // Add images immediately for instant feedback
+      addImages(imageFiles);
+      setIsDragging(false);
 
-            const preview = await createThumbnail(file);
-            return {
-              id: `${Date.now()}-${Math.random()}`,
-              name: path.split(/[\\/]/).pop() || 'image.jpg',
-              path,
-              size: blob.size,
-              preview,
-            };
-          } catch (error) {
-            console.error(`Error processing ${path}:`, error);
-            return null;
+      // Generate previews in background (non-blocking)
+      imageFiles.forEach(async (imageFile) => {
+        try {
+          const imageResponse = await window.electron.loadImage(imageFile.path);
+          if (!imageResponse.success || !imageResponse.dataUrl) {
+            return;
           }
-        })
-      );
 
-      const validImageFiles = imageFiles.filter((img): img is ImageFile => img !== null);
+          // Convert data URL to blob for thumbnail creation
+          const blob = await fetch(imageResponse.dataUrl).then((r) => r.blob());
+          const file = new File([blob], imageFile.name, { type: blob.type });
 
-      if (validImageFiles.length === 0) {
-        alert('Failed to process images from folder');
-      } else {
-        addImages(validImageFiles);
-      }
+          const preview = await createThumbnail(file);
+          updateImagePreview(imageFile.id, preview);
+        } catch (error) {
+          console.error(`Error processing ${imageFile.path}:`, error);
+        }
+      });
     } catch (error) {
       console.error('Folder drop failed:', error);
       alert('Failed to scan folder. Please try again.');
-    } finally {
       setIsDragging(false);
     }
   };

@@ -80,6 +80,8 @@
     "win": {
       "target": "nsis",
       "icon": "resources/icon.ico",
+      "publisherName": "Jan Heben",
+      "verifyUpdateCodeSignature": false,
       "signingHashAlgorithms": [
         "sha256"
       ],

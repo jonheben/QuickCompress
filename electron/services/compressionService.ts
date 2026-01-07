@@ -10,6 +10,7 @@ interface CompressionOptions {
   targetSize?: number;
   targetSizeUnit?: 'KB' | 'MB';
   pngCompressionLevel?: number;
+  removeMetadata?: boolean;
 }
 
 export interface CompressionResult {
@@ -37,10 +38,7 @@ function getUniqueOutputPath(basePath: string): string {
   let newPath: string;
 
   do {
-    newPath = path.join(
-      parsedPath.dir,
-      `${parsedPath.name}_${counter}${parsedPath.ext}`
-    );
+    newPath = path.join(parsedPath.dir, `${parsedPath.name}_${counter}${parsedPath.ext}`);
     counter++;
   } while (fs.existsSync(newPath));
 
@@ -63,7 +61,8 @@ async function compressQualityMode(
   inputPath: string,
   quality: number,
   outputDir: string,
-  format: 'lossy' | 'lossless'
+  format: 'lossy' | 'lossless',
+  removeMetadata: boolean = false
 ): Promise<{ outputPath: string; size: number }> {
   const parsedPath = path.parse(inputPath);
 
@@ -72,18 +71,36 @@ async function compressQualityMode(
     const outputPath = getUniqueOutputPath(baseOutputPath);
     const sharpQuality = Math.round(mapQuality(quality));
 
-    await sharp(inputPath)
-      .jpeg({ quality: sharpQuality, mozjpeg: true })
-      .toFile(outputPath);
+    let pipeline = sharp(inputPath);
+
+    if (removeMetadata) {
+      pipeline = pipeline.withMetadata({
+        exif: {},
+        icc: undefined,
+        iptc: undefined,
+        xmp: undefined,
+      });
+    }
+
+    await pipeline.jpeg({ quality: sharpQuality, mozjpeg: true }).toFile(outputPath);
 
     return { outputPath, size: fs.statSync(outputPath).size };
   } else {
     const baseOutputPath = path.join(outputDir, `${parsedPath.name}_comp.png`);
     const outputPath = getUniqueOutputPath(baseOutputPath);
 
-    await sharp(inputPath)
-      .png({ compressionLevel: quality })
-      .toFile(outputPath);
+    let pipeline = sharp(inputPath);
+
+    if (removeMetadata) {
+      pipeline = pipeline.withMetadata({
+        exif: {},
+        icc: undefined,
+        iptc: undefined,
+        xmp: undefined,
+      });
+    }
+
+    await pipeline.png({ compressionLevel: quality }).toFile(outputPath);
 
     return { outputPath, size: fs.statSync(outputPath).size };
   }
@@ -93,7 +110,8 @@ async function compressTargetPercentMode(
   inputPath: string,
   targetPercent: number,
   outputDir: string,
-  onIteration?: (iteration: number) => void
+  onIteration?: (iteration: number) => void,
+  removeMetadata: boolean = false
 ): Promise<{ outputPath: string; size: number; iterations: number; achieved: boolean }> {
   const parsedPath = path.parse(inputPath);
   const baseOutputPath = path.join(outputDir, `${parsedPath.name}_comp.jpg`);
@@ -119,14 +137,23 @@ async function compressTargetPercentMode(
     const sharpQuality = Math.round(mapQuality(testQuality));
     const tempPath = `${outputPath}.tmp`;
 
-    await sharp(inputPath)
-      .jpeg({ quality: sharpQuality, mozjpeg: true })
-      .toFile(tempPath);
+    let pipeline = sharp(inputPath);
+
+    if (removeMetadata) {
+      pipeline = pipeline.withMetadata({
+        exif: {},
+        icc: undefined,
+        iptc: undefined,
+        xmp: undefined,
+      });
+    }
+
+    await pipeline.jpeg({ quality: sharpQuality, mozjpeg: true }).toFile(tempPath);
 
     const compressedSize = fs.statSync(tempPath).size;
     const ratio = compressedSize / targetSize;
 
-    if (ratio >= (1 - TOLERANCE) && ratio <= (1 + TOLERANCE)) {
+    if (ratio >= 1 - TOLERANCE && ratio <= 1 + TOLERANCE) {
       fs.renameSync(tempPath, outputPath);
       return { outputPath, size: compressedSize, iterations, achieved: true };
     }
@@ -157,7 +184,8 @@ async function compressTargetAbsoluteMode(
   inputPath: string,
   targetSizeKB: number,
   outputDir: string,
-  onIteration?: (iteration: number) => void
+  onIteration?: (iteration: number) => void,
+  removeMetadata: boolean = false
 ): Promise<{ outputPath: string; size: number; iterations: number; achieved: boolean }> {
   const targetSize = targetSizeKB * 1024;
   const parsedPath = path.parse(inputPath);
@@ -182,14 +210,23 @@ async function compressTargetAbsoluteMode(
     const sharpQuality = Math.round(mapQuality(testQuality));
     const tempPath = `${outputPath}.tmp`;
 
-    await sharp(inputPath)
-      .jpeg({ quality: sharpQuality, mozjpeg: true })
-      .toFile(tempPath);
+    let pipeline = sharp(inputPath);
+
+    if (removeMetadata) {
+      pipeline = pipeline.withMetadata({
+        exif: {},
+        icc: undefined,
+        iptc: undefined,
+        xmp: undefined,
+      });
+    }
+
+    await pipeline.jpeg({ quality: sharpQuality, mozjpeg: true }).toFile(tempPath);
 
     const compressedSize = fs.statSync(tempPath).size;
     const ratio = compressedSize / targetSize;
 
-    if (ratio >= (1 - TOLERANCE) && ratio <= (1 + TOLERANCE)) {
+    if (ratio >= 1 - TOLERANCE && ratio <= 1 + TOLERANCE) {
       fs.renameSync(tempPath, outputPath);
       return { outputPath, size: compressedSize, iterations, achieved: true };
     }
@@ -228,13 +265,15 @@ export async function compressImage(
     const originalSize = fs.statSync(inputPath).size;
 
     let result: { outputPath: string; size: number; iterations?: number; achieved?: boolean };
+    const removeMetadata = options.removeMetadata ?? false;
 
     if (options.format === 'lossless') {
       result = await compressQualityMode(
         inputPath,
         options.pngCompressionLevel || 6,
         targetDir,
-        'lossless'
+        'lossless',
+        removeMetadata
       );
     } else {
       if (options.mode === 'quality') {
@@ -242,31 +281,35 @@ export async function compressImage(
           inputPath,
           options.quality || 70,
           targetDir,
-          'lossy'
+          'lossy',
+          removeMetadata
         );
       } else if (options.mode === 'targetPercent') {
         result = await compressTargetPercentMode(
           inputPath,
           options.targetPercent || 50,
           targetDir,
-          onIteration
+          onIteration,
+          removeMetadata
         );
       } else if (options.mode === 'targetAbsolute') {
-        const targetKB = options.targetSizeUnit === 'MB'
-          ? (options.targetSize || 1) * 1024
-          : options.targetSize || 500;
+        const targetKB =
+          options.targetSizeUnit === 'MB'
+            ? (options.targetSize || 1) * 1024
+            : options.targetSize || 500;
         result = await compressTargetAbsoluteMode(
           inputPath,
           targetKB,
           targetDir,
-          onIteration
+          onIteration,
+          removeMetadata
         );
       } else {
         throw new Error('Invalid compression mode');
       }
     }
 
-    const compressionRatio = ((1 - result.size / originalSize) * 100);
+    const compressionRatio = (1 - result.size / originalSize) * 100;
 
     return {
       originalName: parsedPath.base,
@@ -296,7 +339,12 @@ export async function compressImages(
   inputPaths: string[],
   options: CompressionOptions,
   outputDirectory?: string,
-  onProgress?: (completed: number, total: number, result: CompressionResult, iteration?: number) => void
+  onProgress?: (
+    completed: number,
+    total: number,
+    result: CompressionResult,
+    iteration?: number
+  ) => void
 ): Promise<CompressionResult[]> {
   const results: CompressionResult[] = [];
   const total = inputPaths.length;
@@ -308,20 +356,22 @@ export async function compressImages(
       inputPath,
       options,
       outputDirectory,
-      onProgress ? (iteration) => {
-        // Send iteration progress during compression
-        if (onProgress) {
-          const tempResult: CompressionResult = {
-            originalName: path.parse(inputPath).base,
-            originalSize: 0,
-            compressedSize: 0,
-            compressionRatio: 0,
-            outputPath: '',
-            success: true,
-          };
-          onProgress(i, total, tempResult, iteration);
-        }
-      } : undefined
+      onProgress
+        ? (iteration) => {
+            // Send iteration progress during compression
+            if (onProgress) {
+              const tempResult: CompressionResult = {
+                originalName: path.parse(inputPath).base,
+                originalSize: 0,
+                compressedSize: 0,
+                compressionRatio: 0,
+                outputPath: '',
+                success: true,
+              };
+              onProgress(i, total, tempResult, iteration);
+            }
+          }
+        : undefined
     );
 
     results.push(result);
