@@ -2,7 +2,7 @@
 
 A modern, high-performance image compression tool for Windows.
 
-![QuickCompress Main Interface](images_ui/drag&drop_1.png)
+![QuickCompress Main Interface](images_ui/base_1.png)
 
 ## 📥 Download
 
