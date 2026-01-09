@@ -23,7 +23,7 @@
     "electron",
     "desktop"
   ],
-  "author": "",
+  "author": "Jan Heben",
   "license": "MIT",
   "dependencies": {
     "electron-log": "^5.4.3",
@@ -93,7 +93,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "QuickCompress",
-      "warningsAsErrors": false
+      "warningsAsErrors": false,
+      "include": "scripts/installer.nsh"
     }
   },
   "lint-staged": {

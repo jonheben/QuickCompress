@@ -18,10 +18,21 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
 
 # Environment
 .env
 .env.local
+
+# Temporary files
+nul
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE
+*.code-workspace
 
 # Claude Code
 .claude/

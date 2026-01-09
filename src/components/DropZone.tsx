@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
+import { UploadCloud } from 'lucide-react';
 import { useImageStore } from '../store/useImageStore';
 import { createThumbnail } from '../utils/formatters';
 import { ImageFile } from '../types';
@@ -190,27 +191,14 @@ export function DropZone() {
       className={`
         border rounded p-12 text-center cursor-pointer
         transition-colors duration-200
-        ${
-          isDragging
-            ? 'border-tech-orange bg-tech-bg'
-            : 'border-tech-border hover:border-tech-grey bg-tech-surface'
+        ${isDragging
+          ? 'border-tech-orange bg-tech-bg'
+          : 'border-tech-border hover:border-tech-grey bg-tech-surface'
         }
       `}
     >
       <div className="flex flex-col items-center gap-4">
-        <svg
-          className="w-16 h-16 text-tech-grey"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
+        <UploadCloud className="w-16 h-16 text-tech-grey" />
         <div>
           <p className="text-lg font-sans text-tech-white">
             {isDragging ? 'Scanning folder...' : 'Drop PNG or JPEG files here'}

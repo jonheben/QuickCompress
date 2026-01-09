@@ -37,17 +37,15 @@ class WorkerPool {
     // Verify worker file exists
     const fs = require('fs');
     if (!fs.existsSync(this.workerPath)) {
-      console.error('[WorkerPool] Worker file not found at:', this.workerPath);
-      console.error('[WorkerPool] __dirname is:', __dirname);
-      console.error('[WorkerPool] Attempting alternative path...');
+      logger.error('Worker file not found', { workerPath: this.workerPath, dirname: __dirname });
       // Try alternative path for development
       const altPath = path.join(__dirname, '..', '..', 'electron', 'workers', 'compressionWorker.js');
       if (fs.existsSync(altPath)) {
         this.workerPath = altPath;
-        console.log('[WorkerPool] Using alternative path:', this.workerPath);
+        logger.info('Using alternative worker path', { workerPath: this.workerPath });
       }
     } else {
-      console.log('[WorkerPool] Worker initialized at:', this.workerPath);
+      logger.info('Worker initialized', { workerPath: this.workerPath });
     }
   }
 
@@ -75,7 +73,7 @@ class WorkerPool {
     for (let i = 0; i < jobs.length; i += chunkSize) {
       const chunk = jobs.slice(i, i + chunkSize);
       const chunkResults = await Promise.all(
-        chunk.map((job, index) =>
+        chunk.map((job) =>
           this.runWorker(job, (iteration) => {
             // Send iteration updates for in-progress jobs
             if (onProgress) {
@@ -87,7 +85,9 @@ class WorkerPool {
                 outputPath: '',
                 success: true,
               };
-              onProgress(completed + index, total, tempResult, iteration);
+              // Don't use completed + index (causes backwards jumps)
+              // Just send the current completed count
+              onProgress(completed, total, tempResult, iteration);
             }
           })
         )

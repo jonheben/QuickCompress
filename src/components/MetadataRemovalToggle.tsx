@@ -5,23 +5,30 @@ export function MetadataRemovalToggle() {
   const setRemoveMetadata = useImageStore((state) => state.setRemoveMetadata);
 
   return (
-    <div className="mt-6 p-4 bg-tech-bg border border-tech-border rounded">
-      <label className="flex items-center gap-3 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={removeMetadata}
-          onChange={(e) => setRemoveMetadata(e.target.checked)}
-          className="w-5 h-5 rounded border-tech-border bg-tech-surface text-tech-orange focus:ring-2 focus:ring-tech-orange focus:ring-offset-0 cursor-pointer"
+    <div className="mb-6 p-4 bg-[#141414] rounded-lg border border-tech-border flex items-center justify-between">
+      <div>
+        <label className="block text-sm font-sans font-semibold text-tech-white mb-1">
+          Remove Metadata
+        </label>
+        <p className="text-xs font-sans text-tech-grey">
+          Strip EXIF data for smaller files
+        </p>
+      </div>
+
+      <button
+        onClick={() => setRemoveMetadata(!removeMetadata)}
+        className={`
+          relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
+          ${removeMetadata ? 'bg-tech-orange' : 'bg-[#333333]'}
+        `}
+      >
+        <span
+          className={`
+            inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+            ${removeMetadata ? 'translate-x-6' : 'translate-x-1'}
+          `}
         />
-        <div className="flex-1">
-          <span className="text-tech-white font-sans font-medium">
-            Remove metadata (EXIF, GPS, etc.)
-          </span>
-          <p className="text-sm text-tech-grey mt-1">
-            Strip location, camera info, and other metadata from your images
-          </p>
-        </div>
-      </label>
+      </button>
     </div>
   );
 }

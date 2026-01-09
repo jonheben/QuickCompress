@@ -1,12 +1,10 @@
 import { COMPRESSION_PRESETS, PresetKey } from '../config/compressionPresets';
 import { useImageStore } from '../store/useImageStore';
 
-interface PresetSelectorProps {
-  selectedPreset: PresetKey;
-  onPresetChange: (preset: PresetKey) => void;
-}
-
-function PresetSelector({ selectedPreset, onPresetChange }: PresetSelectorProps) {
+// Removed interface
+function PresetSelector() {
+  const selectedPreset = useImageStore((state) => state.selectedPreset);
+  const setPreset = useImageStore((state) => state.setPreset);
   const format = useImageStore((state) => state.compressionFormat);
   const mode = useImageStore((state) => state.compressionMode);
 
@@ -20,7 +18,7 @@ function PresetSelector({ selectedPreset, onPresetChange }: PresetSelectorProps)
   const visiblePresets: PresetKey[] = ['highQuality', 'balanced', 'maxCompression'];
 
   return (
-    <div className="mb-4">
+    <div className="mb-5">
       <label className="block text-sm font-sans text-tech-white mb-2">
         Quality Preset
       </label>
@@ -32,12 +30,11 @@ function PresetSelector({ selectedPreset, onPresetChange }: PresetSelectorProps)
           return (
             <button
               key={presetKey}
-              onClick={() => onPresetChange(presetKey)}
-              className={`flex-1 px-3 py-2 rounded border font-sans text-sm transition-all ${
-                isSelected
-                  ? 'border-tech-orange bg-tech-orange text-white'
-                  : 'border-tech-border bg-transparent text-tech-white hover:border-tech-grey'
-              }`}
+              onClick={() => setPreset(presetKey)}
+              className={`flex-1 px-3 py-1.5 rounded border font-sans text-sm transition-all ${isSelected
+                ? 'border-tech-orange bg-tech-orange text-white'
+                : 'border-tech-border bg-transparent text-tech-white hover:border-tech-grey'
+                }`}
             >
               {preset.label}
             </button>

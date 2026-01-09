@@ -44,7 +44,7 @@ export function OutputDirectorySelector() {
       ) : (
         <button
           onClick={handleSelectDirectory}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-tech-white bg-transparent rounded hover:border-tech-grey transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-tech-white bg-transparent rounded hover:border-tech-grey transition-colors"
         >
           <FolderOpen className="w-5 h-5 text-tech-white" />
           <span className="text-sm font-sans text-tech-white">
@@ -56,7 +56,7 @@ export function OutputDirectorySelector() {
       <p className="mt-2 text-xs font-sans text-tech-grey">
         {outputDirectory
           ? 'Compressed images will be saved to this folder'
-          : 'Compressed images will be saved next to the original files'}
+          : 'No folder selected - compressed copies will be saved next to original files'}
       </p>
     </div>
   );

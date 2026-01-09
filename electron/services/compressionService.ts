@@ -1,6 +1,7 @@
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 
 interface CompressionOptions {
   mode: 'quality' | 'targetPercent' | 'targetAbsolute';
@@ -73,10 +74,8 @@ async function compressQualityMode(
 
     let pipeline = sharp(inputPath);
 
-    if (removeMetadata) {
-      pipeline = pipeline.withMetadata({
-        exif: {},
-      });
+    if (!removeMetadata) {
+      pipeline = pipeline.withMetadata();
     }
 
     await pipeline.jpeg({ quality: sharpQuality, mozjpeg: true }).toFile(outputPath);
@@ -88,10 +87,8 @@ async function compressQualityMode(
 
     let pipeline = sharp(inputPath);
 
-    if (removeMetadata) {
-      pipeline = pipeline.withMetadata({
-        exif: {},
-      });
+    if (!removeMetadata) {
+      pipeline = pipeline.withMetadata();
     }
 
     await pipeline.png({ compressionLevel: quality }).toFile(outputPath);
@@ -133,10 +130,8 @@ async function compressTargetPercentMode(
 
     let pipeline = sharp(inputPath);
 
-    if (removeMetadata) {
-      pipeline = pipeline.withMetadata({
-        exif: {},
-      });
+    if (!removeMetadata) {
+      pipeline = pipeline.withMetadata();
     }
 
     await pipeline.jpeg({ quality: sharpQuality, mozjpeg: true }).toFile(tempPath);
@@ -203,10 +198,8 @@ async function compressTargetAbsoluteMode(
 
     let pipeline = sharp(inputPath);
 
-    if (removeMetadata) {
-      pipeline = pipeline.withMetadata({
-        exif: {},
-      });
+    if (!removeMetadata) {
+      pipeline = pipeline.withMetadata();
     }
 
     await pipeline.jpeg({ quality: sharpQuality, mozjpeg: true }).toFile(tempPath);
@@ -336,17 +329,32 @@ export async function compressImages(
 ): Promise<CompressionResult[]> {
   const results: CompressionResult[] = [];
   const total = inputPaths.length;
+  let completed = 0;
 
-  for (let i = 0; i < inputPaths.length; i++) {
-    const inputPath = inputPaths[i];
+  // Use CPU core count for concurrency, defaulting to 4 if unable to determine
+  const concurrencyLimit = Math.max(1, os.cpus().length || 4);
 
-    const result = await compressImage(
-      inputPath,
-      options,
-      outputDirectory,
-      onProgress
-        ? (iteration) => {
-            // Send iteration progress during compression
+  // Clone paths to a queue
+  const queue = [...inputPaths];
+
+  const worker = async () => {
+    while (queue.length > 0) {
+      const inputPath = queue.shift();
+      if (!inputPath) break;
+
+      // Calculate current item index for progress reporting (approximate in parallel)
+      // For the "iteration" callback, we still want to show *something*
+
+      const result = await compressImage(
+        inputPath,
+        options,
+        outputDirectory,
+        onProgress
+          ? (iteration) => {
+            // Send iteration progress
+            // Note: In parallel mode, this might interleave for different files,
+            // which could cause flickering text in the single-modal UI.
+            // To mitigate, we mainly care about the iteration count.
             if (onProgress) {
               const tempResult: CompressionResult = {
                 originalName: path.parse(inputPath).base,
@@ -356,19 +364,29 @@ export async function compressImages(
                 outputPath: '',
                 success: true,
               };
-              onProgress(i, total, tempResult, iteration);
+              // Pass 'completed' as the number of FULLY completed images so far
+              onProgress(completed, total, tempResult, iteration);
             }
           }
-        : undefined
-    );
+          : undefined
+      );
 
-    results.push(result);
+      results.push(result);
+      completed++;
 
-    // Send final progress update for this image
-    if (onProgress) {
-      onProgress(i + 1, total, result);
+      // Send final progress update for this image
+      if (onProgress) {
+        onProgress(completed, total, result);
+      }
     }
-  }
+  };
+
+  // Start workers
+  const workers = Array(concurrencyLimit)
+    .fill(null)
+    .map(() => worker());
+
+  await Promise.all(workers);
 
   return results;
 }

@@ -9,7 +9,18 @@
       "Bash(dir:*)",
       "Bash(npm install:*)",
       "Bash(npm run prepare:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(npm run electron:dev:*)",
+      "Bash(node -e:*)",
+      "Bash(npm start)",
+      "Bash(npx electron .)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(timeout 30 npm run:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

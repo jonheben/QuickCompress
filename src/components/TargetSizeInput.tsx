@@ -14,7 +14,7 @@ export function TargetSizeInput() {
   }
 
   return (
-    <div className="mb-4">
+    <div className="mb-5">
       <label className="block text-sm font-sans text-tech-white mb-2">
         Target File Size
       </label>
@@ -24,20 +24,20 @@ export function TargetSizeInput() {
           min="1"
           value={targetSize}
           onChange={(e) => setTargetSize(Number(e.target.value))}
-          className="flex-1 px-3 py-2 bg-tech-bg border border-tech-border rounded text-tech-white font-mono text-sm focus:outline-none focus:border-tech-orange transition-colors"
+          className="flex-1 px-3 py-1.5 bg-tech-bg border border-tech-border rounded text-tech-white font-mono text-sm focus:outline-none focus:border-tech-orange transition-colors"
           placeholder="Enter size"
         />
         <select
           value={targetSizeUnit}
           onChange={(e) => setTargetSizeUnit(e.target.value as 'KB' | 'MB')}
-          className="px-3 py-2 bg-tech-bg border border-tech-border rounded text-tech-white font-sans text-sm focus:outline-none focus:border-tech-orange transition-colors"
+          className="px-3 py-1.5 bg-tech-bg border border-tech-border rounded text-tech-white font-sans text-sm focus:outline-none focus:border-tech-orange transition-colors"
         >
           <option value="KB">KB</option>
           <option value="MB">MB</option>
         </select>
       </div>
-      <p className="text-xs font-sans text-tech-grey mt-1">
-        Compression will iterate to achieve this target size
+      <p className="text-[10px] text-tech-grey/70 mt-2">
+        Compression will iterate to achieve this target size. Note: specific size makes the compression slightly slower.
       </p>
     </div>
   );

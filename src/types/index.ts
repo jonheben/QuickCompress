@@ -39,3 +39,12 @@ export interface CompressionResult {
   iterations?: number; // For iterative modes
   targetAchieved?: boolean; // Whether target size was reached
 }
+
+export interface CompressionProgressData {
+  completed: number;
+  total: number;
+  fileName: string;
+  iteration: number;
+  maxIterations: number;
+  isCompletion?: boolean; // True when a file finishes, false for iteration updates
+}

@@ -11,7 +11,7 @@ export function PngCompressionLevelSelector() {
   }
 
   return (
-    <div className="mb-4">
+    <div className="mb-5">
       <div className="flex justify-between items-center mb-2">
         <label className="text-sm font-sans text-tech-white">
           PNG Compression Level

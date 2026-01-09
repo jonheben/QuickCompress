@@ -9,6 +9,7 @@ interface ProgressData {
   success: boolean;
   iteration?: number;
   maxIterations?: number;
+  isCompletion?: boolean; // True when a file finishes, false for iteration updates
 }
 
 contextBridge.exposeInMainWorld('electron', {

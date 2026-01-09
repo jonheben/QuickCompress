@@ -1,18 +1,10 @@
 import { DropZone } from './components/DropZone';
 import { ImageList } from './components/ImageList';
-import { CompressionSlider } from './components/CompressionSlider';
 import { ExportButton } from './components/ExportButton';
 import { CompressionModal } from './components/CompressionModal';
 import { ResultsDisplay } from './components/ResultsDisplay';
 import { ErrorNotification } from './components/ErrorNotification';
-import PresetSelector from './components/PresetSelector';
-import { OutputDirectorySelector } from './components/OutputDirectorySelector';
-import { CompressionFormatToggle } from './components/CompressionFormatToggle';
-import { CompressionModeSelector } from './components/CompressionModeSelector';
-import { TargetSizeInput } from './components/TargetSizeInput';
-import { PngCompressionLevelSelector } from './components/PngCompressionLevelSelector';
-import { FormatWarning } from './components/FormatWarning';
-import { MetadataRemovalToggle } from './components/MetadataRemovalToggle';
+import { CompressionSettings } from './components/CompressionSettings';
 import { useImageStore } from './store/useImageStore';
 import { useState, useEffect } from 'react';
 
@@ -20,8 +12,6 @@ function App() {
   const images = useImageStore((state) => state.images);
   const isProcessing = useImageStore((state) => state.isProcessing);
   const results = useImageStore((state) => state.results);
-  const selectedPreset = useImageStore((state) => state.selectedPreset);
-  const setPreset = useImageStore((state) => state.setPreset);
 
   const [compressionProgress, setCompressionProgress] = useState<{
     completed: number;
@@ -34,12 +24,27 @@ function App() {
   useEffect(() => {
     // Set up progress listener
     const cleanup = window.electron.onCompressionProgress((data) => {
-      setCompressionProgress({
-        completed: data.completed,
-        total: data.total,
-        fileName: data.fileName,
-        iteration: data.iteration,
-        maxIterations: data.maxIterations,
+      setCompressionProgress((prev) => {
+        // If this is a completion event, update everything including filename
+        if (data.isCompletion) {
+          return {
+            completed: data.completed,
+            total: data.total,
+            fileName: data.fileName,
+            iteration: 0, // Reset iteration on new file
+            maxIterations: data.maxIterations,
+          };
+        }
+
+        // For iteration updates, only update the iteration count
+        // Keep the existing filename to prevent flickering
+        return {
+          ...prev,
+          completed: data.completed,
+          total: data.total,
+          iteration: data.iteration,
+          maxIterations: data.maxIterations,
+        };
       });
     });
 
@@ -59,7 +64,7 @@ function App() {
       <ErrorNotification />
 
       {/* Compression Modal - Full screen overlay */}
-      {isProcessing && <CompressionModal progress={compressionProgress} />}
+      {isProcessing && <CompressionModal progress={compressionProgress || undefined} />}
 
       {/* Custom Title Bar */}
       <div className="bg-tech-bg border-b border-tech-border px-4 py-2 flex items-center justify-between drag-region">
@@ -92,15 +97,7 @@ function App() {
 
               {images.length > 0 && (
                 <>
-                  <CompressionFormatToggle />
-                  <FormatWarning />
-                  <CompressionModeSelector />
-                  <PresetSelector selectedPreset={selectedPreset} onPresetChange={setPreset} />
-                  <CompressionSlider />
-                  <TargetSizeInput />
-                  <PngCompressionLevelSelector />
-                  <MetadataRemovalToggle />
-                  <OutputDirectorySelector />
+                  <CompressionSettings />
                   <ExportButton />
                   <ImageList />
                 </>

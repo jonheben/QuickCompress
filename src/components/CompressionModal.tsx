@@ -42,7 +42,7 @@ export function CompressionModal({ progress }: CompressionModalProps) {
 
               {progress.iteration && (
                 <p className="text-sm font-sans text-tech-orange">
-                  Optimizing... attempt {progress.iteration}/{progress.maxIterations}
+                  Optimizing... iteration {progress.iteration}/{progress.maxIterations}
                 </p>
               )}
             </>

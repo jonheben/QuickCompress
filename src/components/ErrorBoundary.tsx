@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import ErrorFallback from './ErrorFallback';
 
 interface Props {
@@ -28,7 +28,6 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('React Error Boundary caught an error:', error, errorInfo);
-    // TODO: Send to error tracking service (e.g., Sentry) in future
   }
 
   resetError = (): void => {

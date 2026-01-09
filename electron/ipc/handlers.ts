@@ -73,16 +73,27 @@ export function setupIpcHandlers() {
         // Get the window to send progress events
         const window = BrowserWindow.fromWebContents(event.sender);
 
+        // Track last completed count to detect completion events
+        let lastCompleted = -1;
+
         const results = await workerPool.compressInParallel(jobs, (completed, total, result, iteration) => {
           // Send progress update to renderer
           if (window) {
+            // Detect if this is a completion event (no iteration OR completed count increased)
+            const isCompletion = iteration === undefined || completed > lastCompleted;
+
+            if (isCompletion) {
+              lastCompleted = completed;
+            }
+
             window.webContents.send('compression-progress', {
               completed,
               total,
               fileName: result.originalName,
               success: result.success,
-              iteration,
-              maxIterations: iteration ? 10 : undefined,
+              iteration: iteration || 0,
+              maxIterations: 10,
+              isCompletion, // NEW: Tell renderer if this is a completion vs iteration
             });
           }
         });
@@ -94,6 +105,9 @@ export function setupIpcHandlers() {
         // Get the window to send progress events
         const window = BrowserWindow.fromWebContents(event.sender);
 
+        // Track last completed count to detect completion events
+        let lastCompletedSeq = -1;
+
         const results = await compressImages(
           imagePaths,
           options,
@@ -101,13 +115,21 @@ export function setupIpcHandlers() {
           (completed, total, result, iteration) => {
             // Send progress update to renderer
             if (window) {
+              // Detect if this is a completion event (no iteration OR completed count increased)
+              const isCompletion = iteration === undefined || completed > lastCompletedSeq;
+
+              if (isCompletion) {
+                lastCompletedSeq = completed;
+              }
+
               window.webContents.send('compression-progress', {
                 completed,
                 total,
                 fileName: result.originalName,
                 success: result.success,
-                iteration,
+                iteration: iteration || 0,
                 maxIterations: 10, // MAX_ITERATIONS from compression service
+                isCompletion, // NEW: Tell renderer if this is a completion vs iteration
               });
             }
           }
