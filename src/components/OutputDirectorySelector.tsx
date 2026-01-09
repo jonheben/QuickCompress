@@ -13,7 +13,7 @@ export function OutputDirectorySelector() {
         setOutputDirectory(result.path);
       }
     } catch (error) {
-      console.error('Failed to select output directory:', error);
+      // Failed to select directory, user may have cancelled
     }
   };
 

@@ -18,22 +18,15 @@ Simply download `QuickCompress Setup 1.0.0.exe` and install it on your Windows P
   - Quality mode (0-100 adjustable)
   - Target file size
   - Target percentage reduction
-- **Windows Integration**: Right-click any image → "Compress with QuickCompress"
 - **Batch Processing**: Compress multiple images at once with real-time progress
 - **Parallel Processing**: Uses all CPU cores for faster compression
 
 ## 🎯 How to Use
 
-### Quick Compression (Context Menu)
-1. Right-click any JPG or PNG image in Windows Explorer
-2. Select "Compress with QuickCompress"
-3. Done! Compressed copy appears next to the original
-
-### Advanced Compression (Full App)
 1. Open QuickCompress from Start menu
-2. Drag & drop images or folders
+2. Drag & drop images or folders into the app
 3. Adjust compression settings:
-   - Choose quality level
+   - Choose quality level (0-100)
    - Set target file size
    - Enable/disable metadata removal
    - Select output format (JPG/PNG)

@@ -1,0 +1,31 @@
+directories:
+  output: release
+  buildResources: resources
+appId: com.quickcompress.app
+productName: QuickCompress
+files:
+  - filter:
+      - dist/**/*
+      - package.json
+extraResources:
+  - from: scripts
+    to: scripts
+    filter:
+      - '*.reg'
+win:
+  target: nsis
+  icon: resources/icon.ico
+  publisherName: Jan Heben
+  verifyUpdateCodeSignature: false
+  signingHashAlgorithms:
+    - sha256
+  signDlls: false
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: QuickCompress
+  warningsAsErrors: false
+  include: scripts/installer.nsh
+electronVersion: 28.3.3

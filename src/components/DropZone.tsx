@@ -67,7 +67,7 @@ export function DropZone() {
         const preview = await createThumbnail(validFiles[index]);
         updateImagePreview(imageFile.id, preview);
       } catch (error) {
-        console.error(`Error creating thumbnail for ${imageFile.name}:`, error);
+        // Thumbnail creation failed, image will be added without preview
       }
     });
   };
@@ -164,11 +164,10 @@ export function DropZone() {
           const preview = await createThumbnail(file);
           updateImagePreview(imageFile.id, preview);
         } catch (error) {
-          console.error(`Error processing ${imageFile.path}:`, error);
+          // Error processing image, skip this file
         }
       });
     } catch (error) {
-      console.error('Folder drop failed:', error);
       alert('Failed to scan folder. Please try again.');
       setIsDragging(false);
     }
