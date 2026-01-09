@@ -85,7 +85,7 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ## 👤 Author
 
-Jan Heben
+Jan Hebein
 
 ---
 
