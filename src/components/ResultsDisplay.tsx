@@ -37,39 +37,55 @@ export function ResultsDisplay() {
 
   return (
     <>
-      <div className="mt-6 bg-tech-surface border border-tech-border rounded p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-sans font-semibold text-tech-white">
-            Compression Complete!
+      <div className="mt-6 bg-tech-surface border border-tech-border rounded-none p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-grotesk font-black uppercase tracking-widest text-tech-text">
+            Compression_Complete
           </h3>
           <button
             onClick={reset}
-            className="text-sm font-sans text-tech-grey hover:text-tech-white font-medium transition-colors"
+            className="text-sm font-mono text-tech-text-secondary hover:text-tech-text font-medium transition-colors uppercase"
           >
-            Compress More Images
+            Compress_More
           </button>
         </div>
 
         {/* Overall Stats */}
-        <div className="bg-tech-bg rounded p-4 mb-4 border border-tech-border">
-          <p className="text-sm font-sans text-tech-white mb-2">
-            <span className="font-mono">{results.length}</span> image{results.length !== 1 ? 's' : ''} compressed:{' '}
-            <span className="font-mono text-tech-white">
-              {formatFileSize(totalOriginalSize)} → {formatFileSize(totalCompressedSize)}
-            </span>
-            {' '}
-            <span className="font-mono font-bold text-tech-green">
-              ({totalRatio.toFixed(1)}% saved)
-            </span>
-          </p>
-          <p className="text-xs font-sans text-tech-grey">
-            Total space saved: <span className="font-mono">{formatFileSize(totalSaved)}</span>
-          </p>
+        <div className="bg-tech-surface-secondary rounded-none p-5 mb-6 border-l-2 border-tech-green">
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs font-grotesk uppercase tracking-widest text-tech-text-secondary">
+                Images_Processed
+              </p>
+              <p className="text-3xl font-mono font-bold text-tech-green">
+                {results.length}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-grotesk uppercase tracking-widest text-tech-text-secondary">
+                Space_Saved
+              </p>
+              <p className="text-3xl font-mono font-bold text-tech-green">
+                {totalRatio.toFixed(1)}%
+              </p>
+              <p className="text-xs font-mono text-tech-text-secondary mt-1">
+                {formatFileSize(totalOriginalSize)} // {formatFileSize(totalCompressedSize)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-grotesk uppercase tracking-widest text-tech-text-secondary">
+                Total_Saved
+              </p>
+              <p className="text-3xl font-mono font-bold text-tech-green">
+                {formatFileSize(totalSaved)}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Image Grid */}
         {results.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
             {results.map((result, index) => (
               <ImageResultCard
                 key={index}
@@ -83,7 +99,7 @@ export function ResultsDisplay() {
         {successfulResults.length > 0 && (
           <button
             onClick={handleOpenFolder}
-            className="w-full bg-tech-orange hover:bg-[#E64500] text-white font-sans font-semibold py-3 px-4 rounded transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-tech-surface border border-tech-border rounded-none py-3 px-5 hover:border-tech-orange hover:bg-tech-orange/5 text-tech-text font-grotesk font-bold uppercase transition-all flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -93,10 +109,10 @@ export function ResultsDisplay() {
         )}
 
         {failedResults.length > 0 && (
-          <div className="mt-3 text-sm text-tech-orange">
-            <p className="font-sans font-medium">Failed to compress <span className="font-mono">{failedResults.length}</span> file(s):</p>
+          <div className="mt-4 text-sm text-tech-red">
+            <p className="font-grotesk font-bold uppercase">Failed to compress <span className="font-mono">{failedResults.length}</span> file(s):</p>
             {failedResults.map((result, index) => (
-              <p key={index} className="text-xs font-sans text-tech-grey">
+              <p key={index} className="text-xs font-mono text-tech-text-secondary mt-1">
                 <span className="font-mono">{result.originalName}</span>: {result.error}
               </p>
             ))}

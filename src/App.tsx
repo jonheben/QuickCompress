@@ -67,37 +67,38 @@ function App() {
       {isProcessing && <CompressionModal progress={compressionProgress || undefined} />}
 
       {/* Custom Title Bar */}
-      <div className="bg-tech-bg border-b border-tech-border px-4 py-2 flex items-center justify-between drag-region">
-        <div className="flex items-center gap-2">
-          <h1 className="text-sm font-semibold text-tech-white">QuickCompress</h1>
+      <div className="bg-tech-surface border-b border-tech-border px-6 py-3 flex items-center justify-between drag-region">
+        <div className="flex items-center gap-3">
+          <h1 className="text-sm font-grotesk font-black uppercase tracking-widest text-tech-text">QuickCompress</h1>
+          <span className="text-[10px] font-mono text-tech-text-muted">ENGINE_V.01</span>
         </div>
+
+        <span className="text-[10px] font-mono text-tech-text-muted">CR_2026 // B:13</span>
+
         <div className="flex gap-2">
           <button
             onClick={() => window.close()}
-            className="w-8 h-8 flex items-center justify-center hover:bg-tech-surface rounded text-tech-grey hover:text-tech-white no-drag transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-none border border-transparent hover:bg-tech-red hover:border-tech-red text-tech-text-secondary hover:text-white no-drag transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
       </div>
 
-      <div className="flex-1 max-w-4xl w-full mx-auto px-6 py-6">
+      <div className="flex-1 max-w-5xl w-full mx-auto px-6 md:px-8 py-8 md:py-10">
         {/* Main Content */}
-        <div className="bg-tech-surface rounded border border-tech-border p-6">
+        <div className="bg-tech-surface rounded-none p-8 md:p-10 border border-tech-border">
           {results.length === 0 ? (
             <>
               <DropZone />
 
               {images.length > 0 && (
                 <>
-                  <CompressionSettings />
+                  <div className="mt-8">
+                    <CompressionSettings />
+                  </div>
                   <ExportButton />
                   <ImageList />
                 </>

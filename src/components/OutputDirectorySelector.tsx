@@ -23,40 +23,40 @@ export function OutputDirectorySelector() {
 
   return (
     <div className="w-full">
-      <label className="block text-sm font-sans text-tech-white mb-2">
-        Output Directory
+      <label className="block text-xs font-grotesk font-semibold uppercase tracking-widest text-tech-text-secondary mb-1">
+        Output_Directory
       </label>
 
       {outputDirectory ? (
-        <div className="flex items-center gap-2 p-3 bg-tech-surface border border-tech-border rounded">
-          <FolderOpen className="w-4 h-4 text-tech-white flex-shrink-0" />
-          <span className="text-sm font-mono text-tech-white flex-1 truncate" title={outputDirectory}>
+        <div className="flex items-center gap-3 p-5 rounded-none bg-tech-surface border border-tech-border">
+          <FolderOpen className="w-5 h-5 text-tech-orange flex-shrink-0" />
+          <span className="text-sm font-mono text-tech-text-muted flex-1 truncate" title={outputDirectory}>
             {outputDirectory}
           </span>
           <button
             onClick={handleClearDirectory}
-            className="p-1 hover:bg-tech-bg rounded transition-colors"
+            className="px-4 py-2 rounded-none border border-tech-border text-tech-red font-medium hover:bg-tech-red/5 transition-colors"
             title="Use default location"
           >
-            <X className="w-4 h-4 text-tech-grey hover:text-tech-white" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       ) : (
         <button
           onClick={handleSelectDirectory}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-tech-white bg-transparent rounded hover:border-tech-grey transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-none border border-tech-border bg-tech-surface hover:border-tech-orange text-tech-text font-medium transition-colors"
         >
-          <FolderOpen className="w-5 h-5 text-tech-white" />
-          <span className="text-sm font-sans text-tech-white">
-            Select Custom Folder (default: next to originals)
+          <FolderOpen className="w-5 h-5 text-tech-text" />
+          <span className="text-sm font-grotesk font-bold uppercase">
+            Select Custom Folder
           </span>
         </button>
       )}
 
-      <p className="mt-2 text-xs font-sans text-tech-grey">
+      <p className="mt-2 text-xs font-mono text-tech-text-muted">
         {outputDirectory
-          ? 'Compressed images will be saved to this folder'
-          : 'No folder selected - compressed copies will be saved next to original files'}
+          ? 'Files will be saved to your custom folder'
+          : 'Files will be saved next to originals by default'}
       </p>
     </div>
   );

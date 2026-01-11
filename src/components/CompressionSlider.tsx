@@ -22,8 +22,8 @@ export function CompressionSlider() {
     setInputValue(value.toString());
   }, [value]);
 
-  // Hide slider for lossless or targetAbsolute mode
-  if (format === 'lossless' || mode === 'targetAbsolute') {
+  // Hide slider for lossless or targetPercent mode (now handled by TargetSizeInput)
+  if (format === 'lossless' || mode === 'targetPercent') {
     return null;
   }
 
@@ -50,99 +50,61 @@ export function CompressionSlider() {
   };
 
   return (
-    <div className="mb-6 p-5 bg-[#141414] rounded-lg border border-tech-border">
-      <div className="flex justify-between items-start mb-6">
-        <label className="text-sm font-sans font-semibold text-tech-white">
-          {isQualityMode ? 'Quality Level' : 'Target Percentage'}
+    <div className="mb-8">
+      <div className="flex justify-between items-baseline mb-3">
+        <label className="text-xs font-grotesk font-semibold uppercase tracking-widest text-tech-text-secondary">
+          {isQualityMode ? 'Quality_Level' : 'Target_Percentage'}
         </label>
-        <input
-          type="number"
-          min={isQualityMode ? 0 : 1}
-          max="100"
-          value={inputValue}
-          onChange={handleInputChange}
-          onBlur={handleBlur}
-          className="w-24 bg-transparent text-right text-3xl font-mono text-tech-orange focus:outline-none border-b border-transparent focus:border-tech-orange transition-colors no-spinners"
-        />
+        <div className="flex items-baseline gap-1">
+          <input
+            type="number"
+            min={isQualityMode ? 0 : 1}
+            max="100"
+            value={inputValue}
+            onChange={handleInputChange}
+            onBlur={handleBlur}
+            className="w-16 bg-transparent text-right text-2xl font-mono font-bold text-tech-orange focus:outline-none border-b border-transparent focus:border-tech-orange transition-colors no-spinners"
+          />
+          <span className="font-mono text-xs text-tech-text-muted">%</span>
+        </div>
       </div>
 
-      <div className="relative h-6 flex items-center">
-        {/* Track Background */}
-        <div className="absolute w-full h-1.5 bg-[#2A2A2A] rounded-full overflow-hidden">
-          {/* Fill Track handled by input range mostly, but let's just style the input properly */}
-        </div>
-
+      <div className="relative h-6 flex items-center mb-4">
         <input
           type="range"
           min={isQualityMode ? 0 : 1}
           max="100"
           value={value}
           onChange={(e) => setValue(Number(e.target.value))}
-          className="w-full h-1.5 bg-[#2A2A2A] rounded-full appearance-none cursor-pointer slider z-10 focus:outline-none"
-          style={{
-            backgroundSize: `${value}% 100%`,
-            backgroundImage: `linear-gradient(#FF4F00, #FF4F00)` // Fill visualization
-          }}
+          className="w-full slider focus:outline-none"
         />
       </div>
 
-      <div className="flex justify-between text-xs text-tech-grey mt-3 font-sans font-medium">
+      <div className="flex justify-between text-xs font-mono uppercase tracking-wider text-tech-text-muted">
         {isQualityMode ? (
           <>
-            <span>Low Quality</span>
-            <span>High Quality</span>
+            <span>LOW</span>
+            <span>HIGH</span>
           </>
         ) : (
           <>
-            <span>Small Size</span>
-            <span>Original Size</span>
+            <span>SMALLER</span>
+            <span>ORIGINAL</span>
           </>
         )}
       </div>
 
       {!isQualityMode && (
-        <p className="text-[10px] text-tech-grey/70 mt-2 text-center">
-          Note: iterating to achieve exactly the specific % makes it a bit slower.
+        <p className="text-xs font-mono text-tech-text-muted mt-3 text-center">
+          Note: Achieving exact percentage may take longer
         </p>
       )}
 
       <style>{`
-        .slider::-webkit-slider-thumb {
+        .no-spinners::-webkit-inner-spin-button,
+        .no-spinners::-webkit-outer-spin-button {
           -webkit-appearance: none;
-          appearance: none;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: #FF4F00;
-          cursor: pointer;
-          border: 2px solid #141414;
-          box-shadow: 0 0 0 1px #FF4F00;
-          transition: transform 0.1s ease;
-        }
-        .slider::-webkit-slider-thumb:hover {
-          transform: scale(1.1);
-        }
-        .slider::-moz-range-thumb {
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: #FF4F00;
-          cursor: pointer;
-          border: 2px solid #141414;
-          box-shadow: 0 0 0 1px #FF4F00;
-        }
-        /* Remove default track styles since we use custom bg */
-        .slider::-webkit-slider-runnable-track {
-            background: transparent; 
-        }
-        .slider::-moz-range-track {
-            background: transparent;
-        }
-        /* Remove number input spinners */
-        .no-spinners::-webkit-inner-spin-button, 
-        .no-spinners::-webkit-outer-spin-button { 
-          -webkit-appearance: none; 
-          margin: 0; 
+          margin: 0;
         }
         .no-spinners {
           -moz-appearance: textfield;

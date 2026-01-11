@@ -16,8 +16,8 @@ export function FormatWarning() {
   }
 
   return (
-    <div className="mb-5 px-3 py-2 bg-tech-bg border border-tech-border rounded">
-      <p className="text-xs font-sans text-tech-grey">
+    <div className="mb-5 px-4 py-3 bg-tech-orange/10 border-l-2 border-tech-orange rounded-none">
+      <p className="text-xs font-mono text-tech-text">
         Converting JPEG to PNG increases file size because PNG preserves all pixel data losslessly
       </p>
     </div>

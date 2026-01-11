@@ -24,7 +24,8 @@ interface ImageStore {
 
   // Mode-specific parameters
   quality: number; // For quality mode
-  targetPercent: number; // For targetPercent mode
+  targetPercent: number; // For targetPercent mode (1-100%)
+  targetSizeMB: number; // For targetPercent mode when viewing in MB (0.2-5 MB)
   targetSize: number; // For targetAbsolute mode (in KB)
   targetSizeUnit: 'KB' | 'MB';
   pngCompressionLevel: number; // For lossless PNG (0-9)
@@ -48,6 +49,7 @@ interface ImageStore {
   setPreset: (preset: PresetKey) => void;
   setQuality: (quality: number) => void;
   setTargetPercent: (percent: number) => void;
+  setTargetSizeMB: (sizeMB: number) => void;
   setTargetSize: (size: number) => void;
   setTargetSizeUnit: (unit: 'KB' | 'MB') => void;
   setPngCompressionLevel: (level: number) => void;
@@ -72,6 +74,7 @@ export const useImageStore = create<ImageStore>((set, get) => ({
   selectedPreset: DEFAULT_PRESET,
   quality: 70,
   targetPercent: 50,
+  targetSizeMB: 1.0,
   targetSize: 500,
   targetSizeUnit: 'KB',
   pngCompressionLevel: 6,
@@ -138,6 +141,8 @@ export const useImageStore = create<ImageStore>((set, get) => ({
 
   setTargetPercent: (percent) => set({ targetPercent: percent, selectedPreset: 'custom' }),
 
+  setTargetSizeMB: (sizeMB) => set({ targetSizeMB: sizeMB, selectedPreset: 'custom' }),
+
   setTargetSize: (size) => set({ targetSize: size, selectedPreset: 'custom' }),
 
   setTargetSizeUnit: (unit) => set({ targetSizeUnit: unit }),
@@ -173,6 +178,7 @@ export const useImageStore = create<ImageStore>((set, get) => ({
       selectedPreset: DEFAULT_PRESET,
       quality: 70,
       targetPercent: 50,
+      targetSizeMB: 1.0,
       targetSize: 500,
       targetSizeUnit: 'KB',
       pngCompressionLevel: 6,

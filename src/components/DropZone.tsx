@@ -188,22 +188,37 @@ export function DropZone() {
       onDrop={handleDrop}
       onClick={handleClick}
       className={`
-        border rounded p-12 text-center cursor-pointer
-        transition-colors duration-200
+        border border-tech-border rounded-none p-16 text-center cursor-pointer
+        transition-colors duration-150
         ${isDragging
-          ? 'border-tech-orange bg-tech-bg'
-          : 'border-tech-border hover:border-tech-grey bg-tech-surface'
+          ? 'border-tech-orange bg-tech-orange/10 border-2'
+          : 'hover:border-tech-orange/60 bg-tech-surface'
         }
       `}
     >
       <div className="flex flex-col items-center gap-4">
-        <UploadCloud className="w-16 h-16 text-tech-grey" />
-        <div>
-          <p className="text-lg font-sans text-tech-white">
-            {isDragging ? 'Scanning folder...' : 'Drop PNG or JPEG files here'}
-          </p>
-          <p className="text-sm text-tech-grey mt-1">
-            {isDragging ? 'Please wait...' : 'or paste from clipboard'}
+        {/* Terminal-style prompt */}
+        <div className="font-mono text-4xl text-tech-orange font-bold tracking-wider">
+          {isDragging ? '> SCANNING_' : '> READY_FOR_INPUT'}
+        </div>
+
+        {/* ASCII-style visual element */}
+        <div className="font-mono text-tech-text-secondary text-sm">
+          {isDragging ? (
+            <div className="animate-pulse">[████████████████████]</div>
+          ) : (
+            <>
+              <div>┌─────────────────────────┐</div>
+              <div>│  DROP_FILES_HERE        │</div>
+              <div>│  .PNG // .JPEG          │</div>
+              <div>└─────────────────────────┘</div>
+            </>
+          )}
+        </div>
+
+        <div className="mt-2">
+          <p className="text-xs font-grotesk uppercase tracking-widest text-tech-text-secondary">
+            {isDragging ? 'Processing' : 'Supports PNG and JPEG'}
           </p>
         </div>
       </div>
