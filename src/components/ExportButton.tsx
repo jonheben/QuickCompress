@@ -59,22 +59,19 @@ export function ExportButton() {
       onClick={handleCompress}
       disabled={images.length === 0 || isProcessing}
       className={`
-        w-full mt-6 py-4 px-6 rounded-lg font-bold font-sans text-lg flex items-center justify-center gap-2
-        transition-all duration-200 shadow-lg hover:shadow-orange-500/20
+        w-full mt-8 py-5 px-6 rounded-none font-grotesk font-black text-sm uppercase tracking-widest
+        flex items-center justify-center gap-2
+        transition-all duration-150
+        border-2
         ${images.length === 0 || isProcessing
-          ? 'bg-tech-surface text-tech-grey cursor-not-allowed border border-tech-border'
-          : 'bg-tech-orange text-white hover:bg-[#FF6A00] transform hover:-translate-y-0.5'
+          ? 'border-tech-border text-tech-text-muted cursor-not-allowed bg-tech-surface'
+          : 'border-tech-orange text-tech-text bg-transparent hover:bg-tech-orange hover:text-black'
         }
       `}
     >
-      {isProcessing ? (
-        'Compressing...'
-      ) : (
-        <>
-          <Zap className="w-5 h-5" />
-          Compress Images
-        </>
-      )}
+      <span className="font-mono text-xs">
+        [ {isProcessing ? 'PROCESSING...' : 'COMPRESS_IMAGES'} ]
+      </span>
     </button>
   );
 }

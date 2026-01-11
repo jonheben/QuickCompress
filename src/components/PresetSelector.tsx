@@ -18,9 +18,9 @@ function PresetSelector() {
   const visiblePresets: PresetKey[] = ['highQuality', 'balanced', 'maxCompression'];
 
   return (
-    <div className="mb-5">
-      <label className="block text-sm font-sans text-tech-white mb-2">
-        Quality Preset
+    <div className="mb-6">
+      <label className="block text-xs font-grotesk font-semibold uppercase tracking-widest text-tech-text-secondary mb-3">
+        Quality_Preset
       </label>
       <div className="flex gap-2">
         {visiblePresets.map((presetKey) => {
@@ -31,9 +31,9 @@ function PresetSelector() {
             <button
               key={presetKey}
               onClick={() => setPreset(presetKey)}
-              className={`flex-1 px-3 py-1.5 rounded border font-sans text-sm transition-all ${isSelected
-                ? 'border-tech-orange bg-tech-orange text-white'
-                : 'border-tech-border bg-transparent text-tech-white hover:border-tech-grey'
+              className={`flex-1 px-4 py-2 rounded-none font-grotesk font-bold uppercase text-sm transition-all ${isSelected
+                ? 'border border-tech-orange bg-tech-orange/5 text-tech-orange'
+                : 'border border-tech-border text-tech-text-secondary hover:border-tech-orange/40'
                 }`}
             >
               {preset.label}
@@ -41,7 +41,7 @@ function PresetSelector() {
           );
         })}
       </div>
-      <p className="text-xs font-sans text-tech-grey mt-1">
+      <p className="text-xs font-mono text-tech-text-muted mt-2">
         {selectedPreset === 'custom'
           ? 'Custom settings'
           : COMPRESSION_PRESETS[selectedPreset].description}

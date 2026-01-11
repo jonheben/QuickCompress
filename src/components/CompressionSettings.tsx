@@ -10,7 +10,7 @@ import { OutputDirectorySelector } from './OutputDirectorySelector';
 
 export function CompressionSettings() {
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <div className="grid grid-cols-1 gap-6">
                 <CompressionFormatToggle />
                 <FormatWarning />
@@ -20,7 +20,7 @@ export function CompressionSettings() {
 
             <PresetSelector />
 
-            <div className="bg-[#141414] p-5 rounded-lg border border-tech-border">
+            <div>
                 <CompressionSlider />
                 <TargetSizeInput />
                 <PngCompressionLevelSelector />

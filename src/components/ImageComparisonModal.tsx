@@ -161,12 +161,12 @@ export function ImageComparisonModal({
   const percentSaved = Math.round(((currentResult.originalSize - currentResult.compressedSize) / currentResult.originalSize) * 100);
 
   return (
-    <div className="fixed inset-0 z-50 bg-tech-bg flex flex-col">
+    <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
       {/* Header - compact to avoid window controls */}
-      <div className="bg-tech-surface px-3 py-1.5 flex items-center text-tech-white border-b border-tech-border" style={{ paddingRight: '160px' }}>
+      <div className="bg-tech-surface border-b border-tech-border py-4 px-6 flex items-center" style={{ paddingRight: '160px' }}>
         <div className="min-w-0 flex-1 mr-2">
-          <h2 className="text-xs font-mono font-semibold truncate">{currentResult.originalName}</h2>
-          <p className="text-xs font-sans text-tech-grey">
+          <h2 className="text-xs font-mono font-semibold truncate text-tech-text uppercase">{currentResult.originalName}</h2>
+          <p className="text-xs font-mono text-tech-text-muted">
             <span className="font-mono">{currentIndex + 1}/{results.length}</span>
             {currentResult.success && (
               <span className="ml-2 text-tech-green font-mono font-medium">
@@ -179,12 +179,13 @@ export function ImageComparisonModal({
         {/* File Size Labels */}
         <div className="flex items-center gap-3 mr-2 flex-shrink-0 text-xs">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-tech-orange"></div>
-            <span className="font-sans font-medium text-tech-grey">Original: <span className="font-mono text-tech-white">{formatFileSize(currentResult.originalSize)}</span></span>
+            <div className="w-2 h-2 rounded-none bg-tech-orange"></div>
+            <span className="font-mono font-medium text-tech-text-secondary uppercase">RAW: <span className="font-mono text-tech-orange font-bold">{formatFileSize(currentResult.originalSize)}</span></span>
           </div>
+          <span className="text-tech-border">//</span>
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-tech-green"></div>
-            <span className="font-sans font-medium text-tech-grey">Compressed: <span className="font-mono text-tech-white">{formatFileSize(currentResult.compressedSize)}</span></span>
+            <div className="w-2 h-2 rounded-none bg-tech-green"></div>
+            <span className="font-mono font-medium text-tech-text-secondary uppercase">COMPRESSED: <span className="font-mono text-tech-green font-bold">{formatFileSize(currentResult.compressedSize)}</span></span>
           </div>
         </div>
 
@@ -192,16 +193,16 @@ export function ImageComparisonModal({
         <div className="flex items-center gap-1 mr-2 flex-shrink-0">
           <button
             onClick={handleZoomOut}
-            className="p-1 hover:bg-tech-bg rounded transition-colors text-tech-white"
+            className="border border-tech-border rounded-none px-3 py-2 hover:border-tech-orange transition-colors text-tech-text"
             title="Zoom out"
             disabled={zoomLevel <= 25}
           >
             <ZoomOut className="w-3.5 h-3.5" />
           </button>
-          <span className="text-xs w-12 text-center font-mono font-medium">{zoomLevel}%</span>
+          <span className="text-xs w-12 text-center font-mono font-medium text-tech-text">{zoomLevel}%</span>
           <button
             onClick={handleZoomIn}
-            className="p-1 hover:bg-tech-bg rounded transition-colors text-tech-white"
+            className="border border-tech-border rounded-none px-3 py-2 hover:border-tech-orange transition-colors text-tech-text"
             title="Zoom in"
             disabled={zoomLevel >= 500}
           >
@@ -209,7 +210,7 @@ export function ImageComparisonModal({
           </button>
           <button
             onClick={handleResetZoom}
-            className="p-1 hover:bg-tech-bg rounded transition-colors text-tech-white"
+            className="border border-tech-border rounded-none px-3 py-2 hover:border-tech-orange transition-colors text-tech-text"
             title="Reset zoom"
           >
             <Maximize2 className="w-3.5 h-3.5" />
@@ -218,7 +219,7 @@ export function ImageComparisonModal({
 
         <button
           onClick={onClose}
-          className="p-1.5 hover:bg-tech-bg rounded transition-colors flex-shrink-0"
+          className="p-1.5 hover:bg-tech-surface-secondary rounded-none transition-colors flex-shrink-0 text-tech-text"
           title="Close (Esc)"
         >
           <X className="w-4 h-4" />
@@ -228,7 +229,7 @@ export function ImageComparisonModal({
       {/* Split Comparison View */}
       <div className="flex-1 bg-tech-bg overflow-auto relative">
         {isLoading ? (
-          <div className="flex items-center justify-center text-tech-grey p-20">
+          <div className="flex items-center justify-center text-tech-text-muted p-20">
             Loading...
           </div>
         ) : (
@@ -284,22 +285,21 @@ export function ImageComparisonModal({
                   </div>
                 )}
 
-                {/* White Slider Line with Pill Badge */}
+                {/* Slider Line with Square Badge */}
                 <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-white pointer-events-none"
+                  className="absolute top-0 bottom-0 w-px bg-tech-orange pointer-events-none"
                   style={{
                     left: `${sliderPosition}%`,
                     transform: 'translateX(-50%)',
-                    boxShadow: '0 0 10px rgba(0,0,0,0.5)',
                   }}
                 >
-                  {/* Pill Badge showing percentage */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-full px-3 py-1 shadow-lg">
-                    <span className="font-mono text-xs text-tech-bg font-medium">{Math.round(sliderPosition)}%</span>
+                  {/* Square Badge showing percentage */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black border border-tech-orange px-2 py-1">
+                    <span className="font-mono text-xs text-tech-orange font-bold">{Math.round(sliderPosition)}%</span>
                   </div>
 
-                  {/* Circular Draggable Handle */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-8 w-6 h-6 bg-white rounded-full shadow-xl border-2 border-tech-bg"></div>
+                  {/* Square Draggable Handle */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-8 w-8 h-8 bg-tech-orange border-2 border-black"></div>
                 </div>
 
               </div>
@@ -314,18 +314,18 @@ export function ImageComparisonModal({
           <button
             onClick={() => onNavigate(currentIndex - 1)}
             disabled={!canNavigatePrev}
-            className="p-2 hover:bg-tech-bg rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-tech-white"
+            className="p-2 hover:bg-tech-surface-secondary rounded-none border border-tech-border hover:border-tech-orange transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-tech-text"
             title="Previous (←)"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="text-tech-grey text-sm font-sans">
+          <span className="text-tech-text-muted text-sm font-mono uppercase">
             Use arrow keys or drag slider to compare
           </span>
           <button
             onClick={() => onNavigate(currentIndex + 1)}
             disabled={!canNavigateNext}
-            className="p-2 hover:bg-tech-bg rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-tech-white"
+            className="p-2 hover:bg-tech-surface-secondary rounded-none border border-tech-border hover:border-tech-orange transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-tech-text"
             title="Next (→)"
           >
             <ChevronRight className="w-5 h-5" />

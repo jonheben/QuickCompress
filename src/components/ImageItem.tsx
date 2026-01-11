@@ -10,10 +10,10 @@ export function ImageItem({ image }: ImageItemProps) {
   const removeImage = useImageStore((state) => state.removeImage);
 
   return (
-    <div className="relative bg-tech-surface rounded border border-tech-border p-3 hover:border-tech-orange transition-colors">
+    <div className="relative bg-tech-surface border border-tech-border rounded-none hover:border-tech-orange transition-all">
       <button
         onClick={() => removeImage(image.id)}
-        className="absolute top-1 right-1 bg-tech-orange text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-[#E64500] transition-colors"
+        className="absolute top-2 right-2 bg-tech-surface rounded-none w-6 h-6 flex items-center justify-center border border-tech-border text-tech-text-secondary hover:bg-tech-red hover:border-tech-red hover:text-white transition-colors z-10"
         title="Remove image"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,18 +21,24 @@ export function ImageItem({ image }: ImageItemProps) {
         </svg>
       </button>
 
-      <img
-        src={image.preview}
-        alt={image.name}
-        className="w-full h-24 object-cover rounded mb-2"
-      />
+      <div className="relative w-full h-24 bg-tech-surface-secondary border-b border-tech-border">
+        <img
+          src={image.preview}
+          alt={image.name}
+          className="w-full h-full object-cover"
+        />
 
-      <p className="text-sm font-sans text-tech-white truncate" title={image.name}>
-        {image.name}
-      </p>
-      <p className="text-xs font-mono text-tech-grey mt-1">
-        {formatFileSize(image.size)}
-      </p>
+        {/* Data overlay at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 bg-black/90 border-t border-tech-border p-1">
+          <span className="text-[10px] font-mono text-tech-text-secondary">{formatFileSize(image.size)}</span>
+        </div>
+      </div>
+
+      <div className="p-2">
+        <p className="text-xs font-mono text-tech-text truncate" title={image.name}>
+          {image.name}
+        </p>
+      </div>
     </div>
   );
 }

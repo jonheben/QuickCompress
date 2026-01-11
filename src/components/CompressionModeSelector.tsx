@@ -12,28 +12,18 @@ export function CompressionModeSelector() {
       label: 'Quality',
       description: 'Set quality level',
       icon: (
-        <svg className="w-5 h-5 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       ),
     },
     {
       value: 'targetPercent',
-      label: 'Target %',
-      description: '% of original',
+      label: 'Target',
+      description: 'Size or percentage',
       icon: (
-        <svg className="w-5 h-5 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-        </svg>
-      ),
-    },
-    {
-      value: 'targetAbsolute',
-      label: 'Target Size',
-      description: 'Specific size',
-      icon: (
-        <svg className="w-5 h-5 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
       ),
     },
@@ -43,11 +33,11 @@ export function CompressionModeSelector() {
   if (format === 'lossless') return null;
 
   return (
-    <div className="mb-6">
-      <label className="block text-sm font-sans text-tech-grey mb-3">
-        Compression Mode
+    <div className="mb-8">
+      <label className="block text-xs font-grotesk font-semibold uppercase tracking-widest text-tech-text-secondary mb-3">
+        Compression_Mode
       </label>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {modes.map((m) => {
           const isActive = mode === m.value;
           return (
@@ -55,22 +45,24 @@ export function CompressionModeSelector() {
               key={m.value}
               onClick={() => setMode(m.value)}
               className={`
-                flex flex-col p-4 rounded-lg border text-left transition-all duration-200 group
+                flex items-center gap-3 p-4 rounded-none text-left transition-all duration-200 group
                 ${isActive
-                  ? 'border-tech-orange bg-[#1A1A1A] text-tech-white shadow-[0_0_0_1px_rgba(255,79,0,0.3)]'
-                  : 'border-tech-border bg-tech-bg/50 text-tech-grey hover:border-tech-grey hover:bg-tech-surface'
+                  ? 'border-2 border-tech-orange bg-tech-orange/5'
+                  : 'bg-tech-surface border border-tech-border hover:border-tech-text-secondary'
                 }
               `}
             >
-              <div className={`${isActive ? 'text-tech-orange' : 'text-tech-grey group-hover:text-tech-white'}`}>
+              <div className={`flex-shrink-0 ${isActive ? 'text-tech-orange' : 'text-tech-text-secondary group-hover:text-tech-orange'}`}>
                 {m.icon}
               </div>
-              <span className={`text-sm font-semibold mb-1 ${isActive ? 'text-tech-white' : 'text-tech-white'}`}>
-                {m.label}
-              </span>
-              <span className="text-xs text-tech-grey">
-                {m.description}
-              </span>
+              <div className="flex flex-col">
+                <span className={`text-sm font-grotesk font-bold uppercase tracking-wide mb-0.5 ${isActive ? 'text-tech-orange' : 'text-tech-text'}`}>
+                  {m.label}
+                </span>
+                <span className={`text-xs font-mono ${isActive ? 'text-tech-text-secondary' : 'text-tech-text-muted'}`}>
+                  {m.description}
+                </span>
+              </div>
             </button>
           );
         })}

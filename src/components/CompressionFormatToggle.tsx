@@ -18,9 +18,9 @@ export function CompressionFormatToggle() {
   ] as const;
 
   return (
-    <div className="mb-6">
-      <label className="block text-sm font-sans text-tech-grey mb-3">
-        Compression Format
+    <div className="mb-8">
+      <label className="block text-xs font-grotesk font-semibold uppercase tracking-widest text-tech-text-secondary mb-3">
+        Compression_Format
       </label>
       <div className="grid grid-cols-2 gap-3">
         {formats.map((f) => (
@@ -28,17 +28,17 @@ export function CompressionFormatToggle() {
             key={f.id}
             onClick={() => setFormat(f.id)}
             className={`
-              flex flex-col items-center justify-center p-4 rounded-lg border text-center transition-all duration-200
+              flex flex-col items-center justify-center p-4 rounded-none text-center transition-all duration-200
               ${format === f.id
-                ? 'border-tech-orange bg-[#1A1A1A] text-tech-white shadow-[0_0_0_1px_rgba(255,79,0,0.3)]'
-                : 'border-tech-border bg-tech-bg/50 text-tech-grey hover:border-tech-grey hover:bg-tech-surface'
+                ? 'border-2 border-tech-orange bg-tech-orange/5'
+                : 'bg-tech-surface border border-tech-border hover:border-tech-text-secondary'
               }
             `}
           >
-            <span className={`text-sm font-semibold mb-1 ${format === f.id ? 'text-tech-white' : 'text-tech-white'}`}>
+            <span className={`text-sm font-grotesk font-bold uppercase mb-1 ${format === f.id ? 'text-tech-orange' : 'text-tech-text'}`}>
               {f.label}
             </span>
-            <span className="text-xs text-tech-grey">
+            <span className={`text-xs font-mono ${format === f.id ? 'text-tech-text-secondary' : 'text-tech-text-muted'}`}>
               {f.description}
             </span>
           </button>

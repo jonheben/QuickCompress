@@ -46,18 +46,18 @@ export function ImageResultCard({ result, onClick }: ImageResultCardProps) {
     <div
       onClick={result.success ? onClick : undefined}
       className={`
-        relative overflow-hidden rounded border bg-tech-surface
+        relative overflow-hidden rounded-none border bg-tech-surface
         transition-all duration-200
         ${result.success
           ? 'border-tech-border cursor-pointer hover:border-tech-orange'
-          : 'border-tech-orange'
+          : 'border-tech-red'
         }
       `}
     >
       {/* Thumbnail */}
-      <div className="relative w-full h-48 bg-tech-bg flex items-center justify-center">
+      <div className="relative w-full h-48 bg-tech-surface-secondary flex items-center justify-center border-b border-tech-border">
         {isLoading ? (
-          <div className="text-sm font-sans text-tech-grey">Loading...</div>
+          <div className="text-sm font-mono text-tech-text-secondary">Loading...</div>
         ) : thumbnailUrl ? (
           <img
             src={thumbnailUrl}
@@ -65,40 +65,46 @@ export function ImageResultCard({ result, onClick }: ImageResultCardProps) {
             className="w-full h-full object-contain"
           />
         ) : (
-          <div className="text-sm font-sans text-tech-grey">
+          <div className="text-sm font-mono text-tech-text-secondary">
             {result.success ? 'No preview' : 'Failed'}
-          </div>
-        )}
-
-        {/* File size badge (top-right) */}
-        {result.success && (
-          <div className="absolute top-2 right-2 bg-tech-bg/90 backdrop-blur-sm text-tech-white rounded px-3 py-2 border border-tech-border">
-            <div className="text-sm font-mono font-medium leading-none">{displaySize}</div>
           </div>
         )}
 
         {/* Error badge */}
         {!result.success && (
-          <div className="absolute top-2 right-2 bg-tech-orange text-white rounded-full p-2">
+          <div className="absolute top-2 right-2 bg-tech-red text-white rounded-none p-2 border border-tech-red">
             <XCircle className="w-5 h-5" />
           </div>
         )}
 
-        {/* Success indicator (bottom-left) */}
+        {/* Success indicator (top-left) */}
         {result.success && (
-          <div className="absolute bottom-2 left-2 bg-tech-surface/90 rounded-full p-1 border border-tech-border">
+          <div className="absolute top-2 left-2 bg-black/90 rounded-none p-1 border border-tech-border">
             <CheckCircle2 className="w-4 h-4 text-tech-green" />
+          </div>
+        )}
+
+        {/* Data overlay - bottom edge */}
+        {result.success && (
+          <div className="absolute bottom-0 left-0 right-0 bg-black/90 border-t border-tech-border p-1 flex justify-between items-center">
+            <span className="text-[10px] font-mono text-tech-text-secondary">
+              {(result.originalSize / 1024 / 1024).toFixed(2)}MB
+            </span>
+            <span className="text-[10px] font-mono text-tech-orange font-bold">//</span>
+            <span className="text-[10px] font-mono text-tech-green">
+              {displaySize}
+            </span>
           </div>
         )}
       </div>
 
       {/* Filename */}
-      <div className="p-3 border-t border-tech-border">
-        <p className="text-sm font-mono text-tech-white truncate" title={result.originalName}>
+      <div className="p-3">
+        <p className="text-sm font-mono text-tech-text truncate" title={result.originalName}>
           {result.originalName}
         </p>
         {result.error && (
-          <p className="text-xs font-sans text-tech-grey mt-1 truncate" title={result.error}>
+          <p className="text-xs font-mono text-tech-text-muted mt-1 truncate" title={result.error}>
             {result.error}
           </p>
         )}

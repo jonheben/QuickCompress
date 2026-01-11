@@ -10,10 +10,10 @@ export function ImageList() {
 
   return (
     <div className="mt-6 pt-6 border-t border-tech-border">
-      <h2 className="text-lg font-sans font-semibold text-tech-white mb-3">
-        Selected Images (<span className="font-mono">{images.length}</span>)
+      <h2 className="text-sm font-grotesk font-bold uppercase tracking-widest text-tech-text mb-3">
+        Selected_Images // <span className="font-mono text-tech-orange">{images.length}</span>
       </h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {images.map((image) => (
           <ImageItem key={image.id} image={image} />
         ))}
