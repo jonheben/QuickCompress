@@ -90,7 +90,7 @@ export function ImageResultCard({ result, onClick }: ImageResultCardProps) {
             <span className="text-[10px] font-mono text-tech-text-secondary">
               {(result.originalSize / 1024 / 1024).toFixed(2)}MB
             </span>
-            <span className="text-[10px] font-mono text-tech-orange font-bold">//</span>
+            <span className="text-[10px] font-mono text-tech-orange font-bold">{'//'}</span>
             <span className="text-[10px] font-mono text-tech-green">
               {displaySize}
             </span>

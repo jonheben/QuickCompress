@@ -7,11 +7,6 @@ files:
   - filter:
       - dist/**/*
       - package.json
-extraResources:
-  - from: scripts
-    to: scripts
-    filter:
-      - '*.reg'
 win:
   target: nsis
   icon: resources/icon.ico
@@ -27,5 +22,4 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: QuickCompress
   warningsAsErrors: false
-  include: scripts/installer.nsh
 electronVersion: 28.3.3

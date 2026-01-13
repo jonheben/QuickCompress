@@ -6,7 +6,8 @@ import { CompressionSlider } from './CompressionSlider';
 import { TargetSizeInput } from './TargetSizeInput';
 import { PngCompressionLevelSelector } from './PngCompressionLevelSelector';
 import { MetadataRemovalToggle } from './MetadataRemovalToggle';
-import { OutputDirectorySelector } from './OutputDirectorySelector';
+import { DeleteOriginalsToggle } from './DeleteOriginalsToggle';
+import { OutputStrategySelector } from './OutputStrategySelector';
 
 export function CompressionSettings() {
     return (
@@ -26,8 +27,9 @@ export function CompressionSettings() {
                 <PngCompressionLevelSelector />
             </div>
 
+            <OutputStrategySelector />
             <MetadataRemovalToggle />
-            <OutputDirectorySelector />
+            <DeleteOriginalsToggle />
         </div>
     );
 }

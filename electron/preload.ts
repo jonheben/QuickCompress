@@ -12,6 +12,12 @@ interface ProgressData {
   isCompletion?: boolean; // True when a file finishes, false for iteration updates
 }
 
+interface ScanProgressData {
+  count: number;
+  folderName: string;
+  done?: boolean;
+}
+
 contextBridge.exposeInMainWorld('electron', {
   compressImages: (imagePaths: string[], options: any, outputDirectory?: string) =>
     ipcRenderer.invoke('compress-images', imagePaths, options, outputDirectory),
@@ -24,6 +30,12 @@ contextBridge.exposeInMainWorld('electron', {
     ipcRenderer.on('compression-progress', listener);
     // Return cleanup function
     return () => ipcRenderer.removeListener('compression-progress', listener);
+  },
+  onScanProgress: (callback: (data: ScanProgressData) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, data: ScanProgressData) => callback(data);
+    ipcRenderer.on('scan-progress', listener);
+    // Return cleanup function
+    return () => ipcRenderer.removeListener('scan-progress', listener);
   },
 });
 
@@ -63,6 +75,7 @@ export interface LoadImageResponse {
 export interface ScanFolderResponse {
   success: boolean;
   imagePaths?: string[];
+  folderName?: string;
   error?: string;
 }
 
@@ -77,6 +90,7 @@ export interface ElectronAPI {
   loadImage: (imagePath: string) => Promise<LoadImageResponse>;
   scanFolder: (folderPath: string) => Promise<ScanFolderResponse>;
   onCompressionProgress: (callback: (data: ProgressData) => void) => () => void;
+  onScanProgress: (callback: (data: { count: number; folderName: string; done?: boolean }) => void) => () => void;
 }
 
 declare global {

@@ -7,6 +7,13 @@ interface ProgressData {
   success: boolean;
   iteration?: number;       // NEW: Current iteration for iterative modes
   maxIterations?: number;   // NEW: Max iterations for iterative modes
+  isCompletion?: boolean;   // True when a file finishes, false for iteration updates
+}
+
+interface ScanProgressData {
+  count: number;
+  folderName: string;
+  done?: boolean;
 }
 
 export interface ElectronAPI {
@@ -37,9 +44,11 @@ export interface ElectronAPI {
   scanFolder: (folderPath: string) => Promise<{
     success: boolean;
     imagePaths?: string[];
+    folderName?: string;
     error?: string;
   }>;
   onCompressionProgress: (callback: (data: ProgressData) => void) => () => void;
+  onScanProgress: (callback: (data: ScanProgressData) => void) => () => void;
 }
 
 declare global {

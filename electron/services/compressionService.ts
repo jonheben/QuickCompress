@@ -2,6 +2,7 @@ import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import { generateOutputPath, OutputPathOptions } from '../utils/namingUtils';
 
 interface CompressionOptions {
   mode: 'quality' | 'targetPercent' | 'targetAbsolute';
@@ -12,6 +13,8 @@ interface CompressionOptions {
   targetSizeUnit?: 'KB' | 'MB';
   pngCompressionLevel?: number;
   removeMetadata?: boolean;
+  outputOptions?: OutputPathOptions;
+  deleteOriginals?: boolean;
 }
 
 export interface CompressionResult {
@@ -26,25 +29,7 @@ export interface CompressionResult {
   targetAchieved?: boolean;
 }
 
-/**
- * Generates a unique output path by appending _1, _2, etc. if file already exists
- */
-function getUniqueOutputPath(basePath: string): string {
-  if (!fs.existsSync(basePath)) {
-    return basePath;
-  }
-
-  const parsedPath = path.parse(basePath);
-  let counter = 1;
-  let newPath: string;
-
-  do {
-    newPath = path.join(parsedPath.dir, `${parsedPath.name}_${counter}${parsedPath.ext}`);
-    counter++;
-  } while (fs.existsSync(newPath));
-
-  return newPath;
-}
+// Removed - now using getUniqueOutputPath from namingUtils
 
 function mapQuality(uiQuality: number): number {
   const quality = Math.max(0, Math.min(100, uiQuality));
@@ -63,13 +48,21 @@ async function compressQualityMode(
   quality: number,
   outputDir: string,
   format: 'lossy' | 'lossless',
-  removeMetadata: boolean = false
+  removeMetadata: boolean = false,
+  outputOptions?: OutputPathOptions
 ): Promise<{ outputPath: string; size: number }> {
   const parsedPath = path.parse(inputPath);
 
+  // Default output options if not provided
+  const options: OutputPathOptions = outputOptions || {
+    strategy: 'suffix',
+    suffix: '_comp',
+  };
+
   if (format === 'lossy') {
-    const baseOutputPath = path.join(outputDir, `${parsedPath.name}_comp.jpg`);
-    const outputPath = getUniqueOutputPath(baseOutputPath);
+    // Determine output extension based on format
+    const tempPath = path.join(outputDir, `${parsedPath.name}.jpg`);
+    const outputPath = generateOutputPath(tempPath, outputDir, options);
     const sharpQuality = Math.round(mapQuality(quality));
 
     let pipeline = sharp(inputPath);
@@ -82,8 +75,9 @@ async function compressQualityMode(
 
     return { outputPath, size: fs.statSync(outputPath).size };
   } else {
-    const baseOutputPath = path.join(outputDir, `${parsedPath.name}_comp.png`);
-    const outputPath = getUniqueOutputPath(baseOutputPath);
+    // Lossless PNG format
+    const tempPath = path.join(outputDir, `${parsedPath.name}.png`);
+    const outputPath = generateOutputPath(tempPath, outputDir, options);
 
     let pipeline = sharp(inputPath);
 
@@ -102,11 +96,19 @@ async function compressTargetPercentMode(
   targetPercent: number,
   outputDir: string,
   onIteration?: (iteration: number) => void,
-  removeMetadata: boolean = false
+  removeMetadata: boolean = false,
+  outputOptions?: OutputPathOptions
 ): Promise<{ outputPath: string; size: number; iterations: number; achieved: boolean }> {
   const parsedPath = path.parse(inputPath);
-  const baseOutputPath = path.join(outputDir, `${parsedPath.name}_comp.jpg`);
-  const outputPath = getUniqueOutputPath(baseOutputPath);
+
+  // Default output options if not provided
+  const options: OutputPathOptions = outputOptions || {
+    strategy: 'suffix',
+    suffix: '_comp',
+  };
+
+  const tempPath = path.join(outputDir, `${parsedPath.name}.jpg`);
+  const outputPath = generateOutputPath(tempPath, outputDir, options);
   const originalSize = fs.statSync(inputPath).size;
   const targetSize = Math.round(originalSize * (targetPercent / 100));
 
@@ -171,12 +173,20 @@ async function compressTargetAbsoluteMode(
   targetSizeKB: number,
   outputDir: string,
   onIteration?: (iteration: number) => void,
-  removeMetadata: boolean = false
+  removeMetadata: boolean = false,
+  outputOptions?: OutputPathOptions
 ): Promise<{ outputPath: string; size: number; iterations: number; achieved: boolean }> {
   const targetSize = targetSizeKB * 1024;
   const parsedPath = path.parse(inputPath);
-  const baseOutputPath = path.join(outputDir, `${parsedPath.name}_comp.jpg`);
-  const outputPath = getUniqueOutputPath(baseOutputPath);
+
+  // Default output options if not provided
+  const options: OutputPathOptions = outputOptions || {
+    strategy: 'suffix',
+    suffix: '_comp',
+  };
+
+  const tempPath = path.join(outputDir, `${parsedPath.name}.jpg`);
+  const outputPath = generateOutputPath(tempPath, outputDir, options);
 
   let minQuality = 0;
   let maxQuality = 100;
@@ -247,6 +257,7 @@ export async function compressImage(
 
     let result: { outputPath: string; size: number; iterations?: number; achieved?: boolean };
     const removeMetadata = options.removeMetadata ?? false;
+    const outputOptions = options.outputOptions;
 
     if (options.format === 'lossless') {
       result = await compressQualityMode(
@@ -254,7 +265,8 @@ export async function compressImage(
         options.pngCompressionLevel || 6,
         targetDir,
         'lossless',
-        removeMetadata
+        removeMetadata,
+        outputOptions
       );
     } else {
       if (options.mode === 'quality') {
@@ -263,7 +275,8 @@ export async function compressImage(
           options.quality || 70,
           targetDir,
           'lossy',
-          removeMetadata
+          removeMetadata,
+          outputOptions
         );
       } else if (options.mode === 'targetPercent') {
         result = await compressTargetPercentMode(
@@ -271,7 +284,8 @@ export async function compressImage(
           options.targetPercent || 50,
           targetDir,
           onIteration,
-          removeMetadata
+          removeMetadata,
+          outputOptions
         );
       } else if (options.mode === 'targetAbsolute') {
         const targetKB =
@@ -283,7 +297,8 @@ export async function compressImage(
           targetKB,
           targetDir,
           onIteration,
-          removeMetadata
+          removeMetadata,
+          outputOptions
         );
       } else {
         throw new Error('Invalid compression mode');
@@ -377,6 +392,17 @@ export async function compressImages(
       // Send final progress update for this image
       if (onProgress) {
         onProgress(completed, total, result);
+      }
+
+      // Move original to recycle bin if enabled and compression was successful
+      if (options.deleteOriginals && result.success) {
+        try {
+          const trash = (await import('trash')).default;
+          await trash(inputPath);
+        } catch (error) {
+          // If trash fails, log but don't fail the compression
+          console.error(`Failed to move ${inputPath} to recycle bin:`, error);
+        }
       }
     }
   };

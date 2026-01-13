@@ -36,5 +36,9 @@ nul
 # IDE
 *.code-workspace
 
-# Claude Code
+# AI Assistant files (local only)
 .claude/
+.gemini/
+task.md
+implementation_plan.md
+walkthrough.md

@@ -155,7 +155,7 @@ export function TargetSizeInput() {
       {/* Show contextual information based on selected unit */}
       {images.length > 0 && avgSizeMB > 0 && (
         <p className="text-xs font-mono text-tech-text-muted mt-3 text-center">
-          ≈ {equivalentValue} // Based on avg image size
+          ≈ {equivalentValue} {'//'} Based on avg image size
         </p>
       )}
 

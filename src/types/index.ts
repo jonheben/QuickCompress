@@ -48,3 +48,13 @@ export interface CompressionProgressData {
   maxIterations: number;
   isCompletion?: boolean; // True when a file finishes, false for iteration updates
 }
+
+// Output strategy types
+export type OutputStrategy = 'subfolder' | 'suffix' | 'custom';
+
+export interface OutputOptions {
+  strategy: OutputStrategy;
+  subfolderName?: string; // For 'subfolder' strategy (default: 'compress')
+  suffix?: string; // For 'suffix' strategy (default: '_comp')
+  customPath?: string; // For 'custom' strategy
+}

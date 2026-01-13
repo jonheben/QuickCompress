@@ -33,15 +33,25 @@ interface ImageStore {
   // Additional options
   removeMetadata: boolean; // Strip EXIF/metadata
 
+  // NEW: Output strategy configuration
+  outputStrategy: 'subfolder' | 'suffix' | 'custom';
+  subfolderName: string;
+  outputSuffix: string;
+
+  // NEW: Delete originals option
+  deleteOriginals: boolean;
+
   // Existing actions
   addImages: (images: ImageFile[]) => void;
   removeImage: (id: string) => void;
+  clearImages: () => void; // NEW: Clear all images
   updateImagePreview: (id: string, preview: string) => void;
   setProcessing: (isProcessing: boolean) => void;
   setResults: (results: CompressionResult[]) => void;
   setOutputDirectory: (directory: string | null) => void;
   setError: (error: string | null) => void;
   reset: () => void;
+  clearResults: () => void; // NEW: Clears results but keeps images/settings
 
   // NEW actions
   setCompressionMode: (mode: CompressionMode) => void;
@@ -54,6 +64,14 @@ interface ImageStore {
   setTargetSizeUnit: (unit: 'KB' | 'MB') => void;
   setPngCompressionLevel: (level: number) => void;
   setRemoveMetadata: (remove: boolean) => void;
+
+  // NEW: Output strategy actions
+  setOutputStrategy: (strategy: 'subfolder' | 'suffix' | 'custom') => void;
+  setSubfolderName: (name: string) => void;
+  setOutputSuffix: (suffix: string) => void;
+
+  // NEW: Delete originals action
+  setDeleteOriginals: (deleteOriginals: boolean) => void;
 
   // Helper to build CompressionOptions
   getCompressionOptions: () => CompressionOptions;
@@ -80,6 +98,14 @@ export const useImageStore = create<ImageStore>((set, get) => ({
   pngCompressionLevel: 6,
   removeMetadata: true,
 
+  // NEW: Output strategy defaults
+  outputStrategy: 'subfolder',
+  subfolderName: 'compress',
+  outputSuffix: '_comp',
+
+  // NEW: Delete originals default
+  deleteOriginals: false,
+
   addImages: (newImages) =>
     set((state) => {
       const newPaths = { ...state.originalImagePaths };
@@ -97,6 +123,12 @@ export const useImageStore = create<ImageStore>((set, get) => ({
     set((state) => ({
       images: state.images.filter((img) => img.id !== id),
     })),
+
+  clearImages: () =>
+    set({
+      images: [],
+      originalImagePaths: {},
+    }),
 
   updateImagePreview: (id, preview) =>
     set((state) => ({
@@ -151,6 +183,16 @@ export const useImageStore = create<ImageStore>((set, get) => ({
 
   setRemoveMetadata: (remove) => set({ removeMetadata: remove }),
 
+  // NEW: Output strategy setters
+  setOutputStrategy: (strategy) => set({ outputStrategy: strategy }),
+
+  setSubfolderName: (name) => set({ subfolderName: name }),
+
+  setOutputSuffix: (suffix) => set({ outputSuffix: suffix }),
+
+  // NEW: Delete originals setter
+  setDeleteOriginals: (deleteOriginals) => set({ deleteOriginals }),
+
   getCompressionOptions: () => {
     const state = get();
     return {
@@ -162,6 +204,13 @@ export const useImageStore = create<ImageStore>((set, get) => ({
       targetSizeUnit: state.targetSizeUnit,
       pngCompressionLevel: state.pngCompressionLevel,
       removeMetadata: state.removeMetadata,
+      deleteOriginals: state.deleteOriginals,
+      outputOptions: {
+        strategy: state.outputStrategy,
+        subfolderName: state.subfolderName,
+        suffix: state.outputSuffix,
+        customPath: state.outputDirectory || undefined,
+      },
     };
   },
 
@@ -183,5 +232,17 @@ export const useImageStore = create<ImageStore>((set, get) => ({
       targetSizeUnit: 'KB',
       pngCompressionLevel: 6,
       removeMetadata: true,
+      outputStrategy: 'subfolder',
+      subfolderName: 'compress',
+      outputSuffix: '_comp',
+      deleteOriginals: false,
+    }),
+
+  clearResults: () =>
+    set({
+      results: [],
+      error: null,
+      isProcessing: false,
+      // Keeps images and settings intact
     }),
 }));

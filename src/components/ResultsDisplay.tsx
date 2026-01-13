@@ -50,6 +50,19 @@ export function ResultsDisplay() {
           </button>
         </div>
 
+        {/* Open Folder Button - Moved to top */}
+        {successfulResults.length > 0 && (
+          <button
+            onClick={handleOpenFolder}
+            className="w-full bg-tech-orange/10 border border-tech-orange rounded-none py-3 px-5 hover:bg-tech-orange/20 text-tech-orange font-grotesk font-bold uppercase transition-all flex items-center justify-center gap-2 mb-6"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+            </svg>
+            Open Folder
+          </button>
+        )}
+
         {/* Overall Stats */}
         <div className="bg-tech-surface-secondary rounded-none p-5 mb-6 border-l-2 border-tech-green">
           <div className="space-y-3">
@@ -69,7 +82,7 @@ export function ResultsDisplay() {
                 {totalRatio.toFixed(1)}%
               </p>
               <p className="text-xs font-mono text-tech-text-secondary mt-1">
-                {formatFileSize(totalOriginalSize)} // {formatFileSize(totalCompressedSize)}
+                {formatFileSize(totalOriginalSize)} {'//'} {formatFileSize(totalCompressedSize)}
               </p>
             </div>
             <div>
@@ -94,18 +107,6 @@ export function ResultsDisplay() {
               />
             ))}
           </div>
-        )}
-
-        {successfulResults.length > 0 && (
-          <button
-            onClick={handleOpenFolder}
-            className="w-full bg-tech-surface border border-tech-border rounded-none py-3 px-5 hover:border-tech-orange hover:bg-tech-orange/5 text-tech-text font-grotesk font-bold uppercase transition-all flex items-center justify-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-            </svg>
-            Open Folder
-          </button>
         )}
 
         {failedResults.length > 0 && (

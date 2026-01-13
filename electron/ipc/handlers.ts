@@ -70,56 +70,20 @@ export function setupIpcHandlers() {
             outputDirectory,
           }));
 
-        // Get the window to send progress events
-        const window = BrowserWindow.fromWebContents(event.sender);
+          // Get the window to send progress events
+          const window = BrowserWindow.fromWebContents(event.sender);
 
-        // Track last completed count to detect completion events
-        let lastCompleted = -1;
+          // Track last completed count to detect completion events
+          let lastCompleted = -1;
 
-        const results = await workerPool.compressInParallel(jobs, (completed, total, result, iteration) => {
-          // Send progress update to renderer
-          if (window) {
-            // Detect if this is a completion event (no iteration OR completed count increased)
-            const isCompletion = iteration === undefined || completed > lastCompleted;
-
-            if (isCompletion) {
-              lastCompleted = completed;
-            }
-
-            window.webContents.send('compression-progress', {
-              completed,
-              total,
-              fileName: result.originalName,
-              success: result.success,
-              iteration: iteration || 0,
-              maxIterations: 10,
-              isCompletion, // NEW: Tell renderer if this is a completion vs iteration
-            });
-          }
-        });
-
-        return { success: true, results };
-      } else {
-        logger.info('Using sequential compression');
-
-        // Get the window to send progress events
-        const window = BrowserWindow.fromWebContents(event.sender);
-
-        // Track last completed count to detect completion events
-        let lastCompletedSeq = -1;
-
-        const results = await compressImages(
-          imagePaths,
-          options,
-          outputDirectory,
-          (completed, total, result, iteration) => {
+          const results = await workerPool.compressInParallel(jobs, (completed, total, result, iteration) => {
             // Send progress update to renderer
             if (window) {
               // Detect if this is a completion event (no iteration OR completed count increased)
-              const isCompletion = iteration === undefined || completed > lastCompletedSeq;
+              const isCompletion = iteration === undefined || completed > lastCompleted;
 
               if (isCompletion) {
-                lastCompletedSeq = completed;
+                lastCompleted = completed;
               }
 
               window.webContents.send('compression-progress', {
@@ -128,22 +92,58 @@ export function setupIpcHandlers() {
                 fileName: result.originalName,
                 success: result.success,
                 iteration: iteration || 0,
-                maxIterations: 10, // MAX_ITERATIONS from compression service
+                maxIterations: 10,
                 isCompletion, // NEW: Tell renderer if this is a completion vs iteration
               });
             }
-          }
-        );
+          });
 
-        return { success: true, results };
+          return { success: true, results };
+        } else {
+          logger.info('Using sequential compression');
+
+          // Get the window to send progress events
+          const window = BrowserWindow.fromWebContents(event.sender);
+
+          // Track last completed count to detect completion events
+          let lastCompletedSeq = -1;
+
+          const results = await compressImages(
+            imagePaths,
+            options,
+            outputDirectory,
+            (completed, total, result, iteration) => {
+              // Send progress update to renderer
+              if (window) {
+                // Detect if this is a completion event (no iteration OR completed count increased)
+                const isCompletion = iteration === undefined || completed > lastCompletedSeq;
+
+                if (isCompletion) {
+                  lastCompletedSeq = completed;
+                }
+
+                window.webContents.send('compression-progress', {
+                  completed,
+                  total,
+                  fileName: result.originalName,
+                  success: result.success,
+                  iteration: iteration || 0,
+                  maxIterations: 10, // MAX_ITERATIONS from compression service
+                  isCompletion, // NEW: Tell renderer if this is a completion vs iteration
+                });
+              }
+            }
+          );
+
+          return { success: true, results };
+        }
+      } catch (error) {
+        logger.error('Compression failed', { error });
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error occurred',
+        };
       }
-    } catch (error) {
-      logger.error('Compression failed', { error });
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-      };
-    }
     }
   );
 
@@ -207,45 +207,72 @@ export function setupIpcHandlers() {
     }
   });
 
-  // Handle recursive folder scanning for images
-  ipcMain.handle('scan-folder', async (_event, folderPath: string) => {
+  // Handle recursive folder scanning for images with progress updates
+  ipcMain.handle('scan-folder', async (event, folderPath: string) => {
     try {
       logger.info('Scanning folder for images', { folderPath });
 
       const imagePaths: string[] = [];
       const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png'];
       const MAX_IMAGES = 1000;
+      const PROGRESS_INTERVAL = 10; // Send progress every N images
+
+      // Get the window to send progress events
+      const window = BrowserWindow.fromWebContents(event.sender);
+      const folderName = path.basename(folderPath);
 
       function scanDirectory(dirPath: string) {
         if (imagePaths.length >= MAX_IMAGES) {
           return;
         }
 
-        const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+        try {
+          const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
-        for (const entry of entries) {
-          if (imagePaths.length >= MAX_IMAGES) {
-            break;
-          }
+          for (const entry of entries) {
+            if (imagePaths.length >= MAX_IMAGES) {
+              break;
+            }
 
-          const fullPath = path.join(dirPath, entry.name);
+            const fullPath = path.join(dirPath, entry.name);
 
-          if (entry.isDirectory()) {
-            // Recursively scan subdirectories
-            scanDirectory(fullPath);
-          } else if (entry.isFile()) {
-            const ext = path.extname(entry.name).toLowerCase();
-            if (IMAGE_EXTENSIONS.includes(ext)) {
-              imagePaths.push(fullPath);
+            if (entry.isDirectory()) {
+              // Recursively scan subdirectories
+              scanDirectory(fullPath);
+            } else if (entry.isFile()) {
+              const ext = path.extname(entry.name).toLowerCase();
+              if (IMAGE_EXTENSIONS.includes(ext)) {
+                imagePaths.push(fullPath);
+
+                // Send progress update every N images
+                if (window && imagePaths.length % PROGRESS_INTERVAL === 0) {
+                  window.webContents.send('scan-progress', {
+                    count: imagePaths.length,
+                    folderName,
+                  });
+                }
+              }
             }
           }
+        } catch (err) {
+          // Skip directories we can't access (permissions)
+          logger.warn('Could not access directory', { dirPath, error: err });
         }
       }
 
       scanDirectory(folderPath);
 
+      // Send final progress update
+      if (window) {
+        window.webContents.send('scan-progress', {
+          count: imagePaths.length,
+          folderName,
+          done: true,
+        });
+      }
+
       logger.info('Folder scan complete', { count: imagePaths.length });
-      return { success: true, imagePaths };
+      return { success: true, imagePaths, folderName };
     } catch (error) {
       logger.error('Folder scan failed', { folderPath, error });
       return {

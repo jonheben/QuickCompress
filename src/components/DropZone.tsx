@@ -1,14 +1,27 @@
 import { useRef, useState, useEffect } from 'react';
-import { UploadCloud } from 'lucide-react';
 import { useImageStore } from '../store/useImageStore';
 import { createThumbnail } from '../utils/formatters';
 import { ImageFile } from '../types';
 
 export function DropZone() {
   const [isDragging, setIsDragging] = useState(false);
+  const [scanProgress, setScanProgress] = useState<{ count: number; folderName: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addImages = useImageStore((state) => state.addImages);
   const updateImagePreview = useImageStore((state) => state.updateImagePreview);
+
+  // Handle scan progress updates
+  useEffect(() => {
+    const cleanup = window.electron.onScanProgress((data) => {
+      if (data.done) {
+        // Small delay before hiding to let user see final count
+        setTimeout(() => setScanProgress(null), 500);
+      } else {
+        setScanProgress({ count: data.count, folderName: data.folderName });
+      }
+    });
+    return cleanup;
+  }, []);
 
   // Handle clipboard paste (Ctrl+V)
   useEffect(() => {
@@ -190,7 +203,7 @@ export function DropZone() {
       className={`
         border border-tech-border rounded-none p-16 text-center cursor-pointer
         transition-colors duration-150
-        ${isDragging
+        ${isDragging || scanProgress
           ? 'border-tech-orange bg-tech-orange/10 border-2'
           : 'hover:border-tech-orange/60 bg-tech-surface'
         }
@@ -199,12 +212,23 @@ export function DropZone() {
       <div className="flex flex-col items-center gap-4">
         {/* Terminal-style prompt */}
         <div className="font-mono text-4xl text-tech-orange font-bold tracking-wider">
-          {isDragging ? '> SCANNING_' : '> READY_FOR_INPUT'}
+          {scanProgress
+            ? `> SCANNING_${scanProgress.folderName.toUpperCase().slice(0, 12)}`
+            : isDragging
+              ? '> SCANNING_'
+              : '> READY_FOR_INPUT'}
         </div>
 
-        {/* ASCII-style visual element */}
+        {/* ASCII-style visual element or scan progress */}
         <div className="font-mono text-tech-text-secondary text-sm">
-          {isDragging ? (
+          {scanProgress ? (
+            <div className="space-y-2">
+              <div className="animate-pulse">[████████████████████]</div>
+              <div className="text-tech-orange font-bold text-lg">
+                Found {scanProgress.count} images...
+              </div>
+            </div>
+          ) : isDragging ? (
             <div className="animate-pulse">[████████████████████]</div>
           ) : (
             <>
@@ -218,7 +242,11 @@ export function DropZone() {
 
         <div className="mt-2">
           <p className="text-xs font-grotesk uppercase tracking-widest text-tech-text-secondary">
-            {isDragging ? 'Processing' : 'Supports PNG and JPEG'}
+            {scanProgress
+              ? `Scanning ${scanProgress.folderName}...`
+              : isDragging
+                ? 'Processing'
+                : 'Supports PNG and JPEG'}
           </p>
         </div>
       </div>

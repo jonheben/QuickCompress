@@ -182,7 +182,7 @@ export function ImageComparisonModal({
             <div className="w-2 h-2 rounded-none bg-tech-orange"></div>
             <span className="font-mono font-medium text-tech-text-secondary uppercase">RAW: <span className="font-mono text-tech-orange font-bold">{formatFileSize(currentResult.originalSize)}</span></span>
           </div>
-          <span className="text-tech-border">//</span>
+          <span className="text-tech-border">{'//'}</span>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-none bg-tech-green"></div>
             <span className="font-mono font-medium text-tech-text-secondary uppercase">COMPRESSED: <span className="font-mono text-tech-green font-bold">{formatFileSize(currentResult.compressedSize)}</span></span>
