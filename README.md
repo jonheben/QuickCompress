@@ -2,20 +2,22 @@
 
 A modern, high-performance image compression tool for Windows.
 
-<img width="1000" height="1552" alt="new_base" src="https://github.com/user-attachments/assets/b81b592a-0e6f-41b1-916d-b9f3406011df" />
-
+<p align="center">
+  <img src=".github/assets/screenshot.png" alt="QuickCompress v1.2" width="600" />
+</p>
 
 ## 📥 Download
 
 **For Users**: Download the latest installer from [Releases](https://github.com/jonheben/QuickCompress/releases)
 
-Simply download `QuickCompress Setup 1.0.0.exe` and install it on your Windows PC.
+Simply download `QuickCompress Setup 1.2.0.exe` and install it on your Windows PC.
 
 ## 🚀 Features
 
 - **Smart Compression**: Optimize JPG and PNG images without visible quality loss
 - **Drag & Drop**: Simple, intuitive interface
-- **Format Conversion**: Convert between JPG and PNG easily
+- **Output Strategies**: Save to subfolder, add suffix, or custom folder
+- **Delete Originals**: Safely move to Recycle Bin after compression
 - **Privacy First**: Toggle metadata removal (EXIF data) for smaller, cleaner files
 - **Multiple Compression Modes**:
   - Quality mode (0-100 adjustable)
@@ -33,6 +35,7 @@ Simply download `QuickCompress Setup 1.0.0.exe` and install it on your Windows P
    - Set target file size
    - Enable/disable metadata removal
    - Select output format (JPG/PNG)
+   - Choose output strategy (Subfolder/Suffix/Custom)
 4. Click "Compress Images"
 5. View results and open output folder
 
@@ -40,8 +43,8 @@ Simply download `QuickCompress Setup 1.0.0.exe` and install it on your Windows P
 
 ### Compression Progress & Results
 <p align="center">
-  <img src="images_ui/ui/pZZI7wm6Dg.png" width="45%" />
-  <img src="images_ui/ui/gSOU4b0kuQ.png" width="45%" />
+  <img src=".github/assets/ui/pZZI7wm6Dg.png" width="45%" />
+  <img src=".github/assets/ui/gSOU4b0kuQ.png" width="45%" />
 </p>
 
 ## 🛠️ For Developers
